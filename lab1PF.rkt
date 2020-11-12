@@ -85,7 +85,7 @@ r2
 ;Representación: lista de dos elementos
 ;Par (string ofertor,int valorRecompensa)
 ;Capa constructor.
-(define emptyReward null)
+(define emptyReward (cons "" 0))
 (define recompensa(lambda(ofertor vRecompensa)
                     (if(and (string? ofertor)(integer? vRecompensa))
                        (cons ofertor vRecompensa)
@@ -106,7 +106,7 @@ recompensa1
 
 ;Capa pertenencia.
 (define recompensa?(lambda(recompensa)
-                     (if (null? recompensa)
+                     (if (eqv? emptyReward recompensa)
                          true
                          (if(and (pair? recompensa)(string? (getOfertor recompensa))(integer? (getValorRecompensa recompensa)))
                             true
@@ -129,7 +129,7 @@ recompensa1
 (define emptyAnswer null)
 (define respuesta(lambda( idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
                  (if(and(integer? idRespuesta)(string? autor)(date? fecha)(string? contenidoRes)(list? etiquetas)
-                   (string? aceptacion)(integer? vFavor)(integer? vContra)(reportes? reportesRes))
+                   (string? aceptacion)(integer? vFavor)(integer? vContra)(integer? reportesRes))
                      (list idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
                      emptyAnswer
                     )
@@ -137,8 +137,10 @@ recompensa1
  )
  ;Ejemplo:
 (define emptyList null)
-(define a1(respuesta 0 "Ana" (date 2 3 2020) "Los 12 meses" emptyList "Rechazada" 10 2 r1))
-(define a2(respuesta 1 "Juan" (date 1 2 2020) "solo 1 mes, febrero" emptyList "" 2 9 r1))
+(define a1(respuesta 0 "Ana" (date 2 3 2020) "Los 12 meses" emptyList "Aceptada" 10 2 0))
+(define a2(respuesta 1 "Juan" (date 1 2 2020) "solo 1 mes, febrero" emptyList "Rechazada" 2 9 3))
+(define a3(respuesta 2 "Pedro" (date 1 2 2020) "Nose" emptyList "Rechazada" 4 5 6))
+(define a4(respuesta 3 "Ana" (date 2 3 2020) "365 días" emptyList "Aceptada" 12 2 0))
 a1
 a2
 
@@ -164,7 +166,7 @@ a2
                     (if (null? lista)
                         true
                         (if(and(list? lista)(integer? (getIdRes lista))(string? (getContenidoRes lista))(string? (getAutorRes lista) )(date? (getFechaRes lista))
-                               (string? (getAceptacionRes lista))(integer? (getVfavorRes lista))(integer? (getVcontraRes lista))(reportes? (getReportesRes lista)))
+                               (string? (getAceptacionRes lista))(integer? (getVfavorRes lista))(integer? (getVcontraRes lista))(integer? (getReportesRes lista)))
                            true
                            false
                            )
@@ -180,7 +182,8 @@ a2
 (define (respuestas . respuesta) respuesta)
 ;Ejemplo:
 (define sinRespuestasAun null)
-(define respuestas1(respuestas a1 a2))
+(define respuestas1(respuestas a1 a2 a3))
+(define respuestas2(respuestas a4))
 respuestas1
 
 ;Capa selector.
@@ -302,15 +305,16 @@ u2
    (idPregunta autor fechaPublicacion contenido etiquetas estado nVisualizaciones votAfavor votEnContra  recompensa reportes respuestas)
                   (if(and(integer? idPregunta)(string? autor)(date? fechaPublicacion)(contenidoPreg? contenido)(list? etiquetas)
                   (string? estado)(integer? nVisualizaciones)(integer? votAfavor)(integer? votEnContra)(recompensa? recompensa)
-                  (reportes? reportes)(respuestas? respuestas))
+                  (integer? reportes)(respuestas? respuestas))
                      (list idPregunta autor fechaPublicacion contenido etiquetas estado nVisualizaciones votAfavor votEnContra recompensa reportes respuestas)
                      emptyAsk
                      )
                   )
   )
 ;Ejemplo:
-(define p1(pregunta 0  "Maria" (date 29 2 2020) (cons "Duda" "¿cuantos meses tienen 29 dias?") '() "abierta" 10 3 2  (recompensa "Maria" 10) r1 respuestas1))
-(define p2(pregunta 1 "Ana" (date 29 12 2020) (cons "kahdja" "¿jahjajjkaldlsajahn?")(list "lkal") "abierta" 20 5 9 emptyReward r1 emptyAnswer)) 
+(define p1(pregunta 0  "Maria" (date 29 2 2020) (cons "Duda" "¿cuantos meses tienen 29 dias?") '() "abierta" 10 3 2  (recompensa "Maria" 10) 1 respuestas1))
+(define p2(pregunta 1 "Ana" (date 29 12 2020) (cons "kahdja" "¿jahjajjkaldlsajahn?")(list "lkal") "abierta" 20 5 9 emptyReward 0 emptyAnswer))
+(define p3(pregunta 2  "Maria" (date 30 2 2020) (cons "Año" "¿cuantos dias tiene un año?") '() "abierta" 1 1 0  (recompensa "Ana" 5) 3 respuestas2))
 p1
 p2
 ;Capa selector.
@@ -338,7 +342,7 @@ o
                         (if(and(list? ask)(integer? (getIdPreg ask))(contenidoPreg? (getContenidoPreg ask))(string? (getAutorPreg ask))
                                (date? (getFechaPreg ask))(string? (getEstadoPreg ask))(integer? (getVisualizacionesPreg ask))
                                (integer? (getVfavorPreg ask))(integer? (getVcontraPreg ask))(list? (getEtiquetasPreg ask))
-                               (recompensa? (getRecompensa ask))(reportes? (getReportesPreg ask))(respuestas? (getRespuestas ask)))
+                               (recompensa? (getRecompensa ask))(integer? (getReportesPreg ask))(respuestas? (getRespuestas ask)))
                            true
                            false
                            )
@@ -348,42 +352,12 @@ o
 ;Ejemplo:
 (pregunta? p1)
 
-(getIdPreg p1)
-
-(getContenidoPreg p1)
-(string? (getAutorPreg p1))
-(getAutorPreg p1)
-(date? (getFechaPreg p1))
-(getFechaPreg p1)
-(string? (getEstadoPreg p1))
-(getEstadoPreg p1)
-(integer? (getVisualizacionesPreg p1))
-(getVisualizacionesPreg p1)
-(integer? (getVfavorPreg p1))
-(getVfavorPreg p1)
-(integer? (getVcontraPreg p1))
-(getVcontraPreg p1)
-(list? (getEtiquetasPreg p1))
-(getEtiquetasPreg p1)
-(integer? (getRecompensa p1))
-(getRecompensa p1)
-(reportes? (getReportesPreg p1))
-(getReportesPreg p1)
-(respuestas? (getRespuestas p1))
-(getRespuestas p1)
-
-
-
-
-
-
-
 ;TDA preguntas.
 ;Representacion: lista de preguntas.
 ;Capa constructor.
 (define (preguntas . pregunta) pregunta)
 ;Ejemplo:
-(define preguntas1(preguntas p1 p2))
+(define preguntas1(preguntas p1 p2 p3))
 preguntas1
 
 ;La capa selector se reutiliza 
@@ -406,16 +380,6 @@ preguntas1
                   emptyStack
                   )
                )
-  )
-
-;Largo lista
-;funcion necesaria
-(define largo(lambda(lista n)
-              (if(null? lista)
-                  n
-                  (largo (cdr lista) (+ n 1))
-                  )
-              )
   )
 
 ;Ejemplo:
@@ -778,15 +742,105 @@ l
                                        (actualizarPreguntasVot (getPreguntas sta) idPreg booleano)
                                        (getCorrPreg sta)(getCorrRes sta))))
 
+;Actualizar una respuesta cuando recibe un voto, positivo o negativo.
+(define modificarResVot(lambda(res booleano)
+                         (if booleano
+                             (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
+                                        (+ 1 (getVfavorRes res)) (getVcontraRes res) (getReportesRes res))
+                             (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
+                                        (getVfavorRes res) (+ 1 (getVcontraRes res)) (getReportesRes res)))))
+
+  
+;Dom: una lista de respuestas el id de la respuesta y un booleano.
+;Rec: una lista de preguntas actualizada con el voto realizado.
+(define actualizarResVot(lambda (listaRes idRes booleano)
+                          (actualizar listaRes idRes getIdRes modificarResVot booleano)))
+
+  
+;Rec: una lista una pregunta y una lista de respuestas actualizada.
+;Dom: un TDA pregunta actualizada, con sus respuestas actualizadas (con el voto agregado)
+(define modificarPregVotRes(lambda(ask respuestasActualizada)
+                             (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
+                                       (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (getVcontraPreg ask)
+                                       (getRecompensa ask) (getReportesPreg ask) respuestasActualizada)))
+  
 
 
-                                        
-                            
-                                     
-                        
-                        
+;Dom: un TDA preguntas, 2 int: un identificadore de pregunta y uno de respuesta.
+;Rec:TDA preguntas actualizado, con la pregunta actualizada(idPreg).
+(define actualizarPreguntasVotRes(lambda(listaPreg idPreg res booleano)
+                                   (if (null? listaPreg)
+                                       emptylist
+                                       (if(eqv? idPreg (getIdPreg (primerElemento listaPreg)))
+                                          (cons
+                                           (modificarPregVotRes(primerElemento listaPreg) (actualizarResVot(getRespuestas(primerElemento listaPreg)) (getIdRes res) booleano))
+                                           (siguientesElementos listaPreg))
+                                          (cons (primerElemento listaPreg) (actualizarPreguntasVotRes (siguientesElementos listaPreg) idPreg res booleano))
+                                          ))))
 
-                            
+
+;Actualiza el stack cuando el voto esta destinado a una respuesta  
+(define actualizarStackVotRes(lambda(sta booleano funcion idPreg)
+                               (stack (actualizarUsuariosReputacionVotRes (getUsuarios sta) (getAutorRes ((funcion idPreg)(getPreguntas sta)))
+                                                                          (getNomUser (getActivo sta)) booleano)
+                                      emptyUser
+                                      (actualizarPreguntasVotRes (getPreguntas sta) idPreg ((funcion idPreg)(getPreguntas sta)) booleano)
+                                      (getCorrPreg sta)(getCorrRes sta))))
+
+                       
+(define vote(lambda(sta)
+              (lambda(funcion)
+                (lambda(idPreg)
+                  (lambda(booleano)
+                    (if (eqv? getQuestion funcion)
+                        (actualizarStackVotPreg sta booleano funcion idPreg)
+                        (actualizarStackVotRes sta booleano funcion idPreg)))))))
+;Ejemplo:
+
+l
+stack1
+l
+((((login stack1 "Maria" "Maria1999" vote)(getAnswer 1))0)false)
+
+
+;Función 9: mostrar el stack como un string ordenado.
+;(display (list "los usuarios del stack son:\n" (getUsuarios stack1)))
+;Función que muestra los datos de un usuario.
+(define mostrarElementosList(lambda(lista)
+                              (if (null? lista)
+                                  emptyList
+                                  (if (null? (siguientesElementos lista))
+                                      (cons (primerElemento lista)(cons "." null))
+                                      (cons (primerElemento lista)(cons "," (mostrarElementosList (siguientesElementos lista))))))))
+
+                                 
+(define mostrarUsuario(lambda(user)
+                        (list "Nombre usuario:"(getNomUser user)
+                              "\nContraseña:"(getContraseña user)
+                              "\nReputación:"(getReputacion user)"puntos"
+                              "\nReferencias:"(mostrarElementosList (getReferencias user))"\n"
+                              )))
+;Ejemplo:
+(mostrarUsuario u1)
+(display (mostrarUsuario u1))
+
+;Función para mostrar una lista de usuarios.
+(define mostrarElementos(lambda(listaElementos funcionMostrar)
+                         (if (null? listaElementos)
+                             emptyList
+                             (list "\n"
+                                   (if (null? (siguientesElementos listaElementos))
+                                       (cons (funcionMostrar (primerElemento listaElementos))(cons "\n" null))
+                                       (cons (funcionMostrar (primerElemento listaElementos))(cons "\n" (mostrarElementos (siguientesElementos listaElementos) funcionMostrar))))))))
+
+(define mostrarUsuarios(lambda(listaUsuarios)
+                         (mostrarElementos listaUsuarios mostrarUsuario)))
+
+  
+
+;Ejemplo:
+(mostrarUsuarios usuarios1)
+(display (mostrarUsuarios usuarios1))
 
 
 
