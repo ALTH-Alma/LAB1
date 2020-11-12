@@ -575,13 +575,13 @@ l
 (define modificarReputacion(lambda(user modificacion) ;Donde moficacion es un par que indica(operacion.monto). Ejemplo: (- . 20), (+ . 10), etc.
                                      (usuario (getNomUser user) (getContraseña user) ((car modificacion) (getReputacion user) (cdr modificacion)) (getReferencias user))))
 
-(define actualizarUsuariosReputacion(lambda(listaUsuarios nombre monto)
-                                      (actualizar listaUsuarios nombre getNomUser modificarReputacion (cons - monto))))
+(define actualizarUsuariosReputacion(lambda(listaUsuarios nombre operacion)
+                                      (actualizar listaUsuarios nombre getNomUser modificarReputacion operacion)))
 ;Ejemplo:
   l
   l
   l
-(actualizarUsuariosReputacion usuarios1 "Ana" 5)
+(actualizarUsuariosReputacion usuarios1 "Ana" (cons - 5))
 
 
 (define modificarPregRecompensa(lambda(ask recompensa)
@@ -601,12 +601,13 @@ l
   (lambda(idPreg)
     (lambda(montoRecompensa)
      (if (puedeOfrecer (getUsuario (getNomUser (getActivo sta))(getUsuarios sta)) montoRecompensa)
-        (stack (actualizarUsuariosReputacion (getUsuarios sta) (getNomUser (getActivo sta))  montoRecompensa)
+        (stack (actualizarUsuariosReputacion (getUsuarios sta) (getNomUser (getActivo sta)) (cons - montoRecompensa))
                emptyUser
                (actualizarPreguntasRecompensa (getPreguntas sta) idPreg (recompensa (getNomUser (getActivo sta)) montoRecompensa))
                (getCorrPreg sta)(getCorrRes sta))
         sta
         )))))
+
 ;Ejemplo:
 l
 l
@@ -696,17 +697,17 @@ l
                                                 
 ;El autor de la pregunta, quien es el unico que puede aceptar respuestas a sus preguntas gana +2 de reputacion
 ;El autor de la respuesta que fue aceptada gana +15 por responder y +monto de recompensa en la pregunta.
-(define actualizarUsuariosAccept(lambda(listaUsuarios autorRes autorPreg montoRecompensa)
+(define actualizarUsuarios2Reput(lambda(listaUsuarios persona1 persona2 operacion1 operacion2)
                                   (if (null? listaUsuarios)
                                       emptyUser
-                                      (if(eqv? autorPreg (getNomUser (primerElemento listaUsuarios)))
-                                         (cons (modificarReputacion (primerElemento listaUsuarios)(cons + 2))
-                                               (actualizarUsuariosAccept (siguientesElementos listaUsuarios) autorRes autorPreg montoRecompensa))
-                                         (if(eqv? autorRes (getNomUser (primerElemento listaUsuarios)))
-                                            (cons (modificarReputacion (primerElemento listaUsuarios)(cons + (+ 15 montoRecompensa)))
-                                                  (actualizarUsuariosAccept (siguientesElementos listaUsuarios) autorRes autorPreg montoRecompensa))
+                                      (if(eqv? persona2 (getNomUser (primerElemento listaUsuarios)))
+                                         (cons (modificarReputacion (primerElemento listaUsuarios) operacion2)
+                                               (actualizarUsuarios2Reput (siguientesElementos listaUsuarios)persona1 persona2 operacion1 operacion2))
+                                         (if(eqv? persona1 (getNomUser (primerElemento listaUsuarios)))
+                                            (cons (modificarReputacion (primerElemento listaUsuarios)operacion1)
+                                                  (actualizarUsuarios2Reput (siguientesElementos listaUsuarios) persona1 persona2 operacion1 operacion2))
                                             (cons (primerElemento listaUsuarios)
-                                                  (actualizarUsuariosAccept (siguientesElementos listaUsuarios) autorRes autorPreg montoRecompensa)))))))
+                                                  (actualizarUsuarios2Reput (siguientesElementos listaUsuarios) persona1 persona2 operacion1 operacion2)))))))
 ;Ejemplo:
 ;(actualizarUsuariosAccept usuarios1 "Ana" "Maria" 10)
 
@@ -727,8 +728,9 @@ l
                   (lambda(idRes)
                   (if(and (esResDePreg (getRespuestas ((getQuestion idPreg)(getPreguntas sta))) idRes) ; si la rspuesta corresponde a la pregunta
                           (eqv? (getNomUser (getActivo sta)) (getAutorPreg ((getQuestion idPreg )(getPreguntas sta))))) ;y es pregunta del usuario activo, puede acceptar
-                     (stack (actualizarUsuariosAccept (getUsuarios sta)(getAutorRes (((getAnswer idRes)idPreg)(getPreguntas sta)))(getNomUser (getActivo sta))
-                                                      (getValorRecompensa(getRecompensa((getQuestion idPreg)(getPreguntas sta)))))
+                     (stack (actualizarUsuarios2Reput (getUsuarios sta)(getAutorRes (((getAnswer idRes)idPreg)(getPreguntas sta)))(getNomUser (getActivo sta))
+                                                      (cons + (+ 15 (getValorRecompensa(getRecompensa((getQuestion idPreg)(getPreguntas sta))))))
+                                                      (cons + 2))
                             emptyUser
                             (actualizarPreguntasAccept (getPreguntas sta) idPreg idRes)
                             (getCorrPreg sta)
@@ -742,11 +744,55 @@ stack1
 l
 (((login stack1 "Maria" "Maria1999" accept)1)0)
 
-;Función 10:
+;Función 10: vote: permite votar a favor o encontra de una pregunta o una respuesta.
+;Actualizar usuarios.
+(define actualizarUsuariosReputacionVotPreg(lambda(listaUsuarios nombre booleano)
+                                             (if booleano
+                                                 (actualizarUsuariosReputacion listaUsuarios nombre (cons + 10))
+                                                 (actualizarUsuariosReputacion listaUsuarios nombre (cons - 2)))))
+
+(define actualizarUsuariosReputacionVotRes(lambda(listaUsuarios autorRes votador booleano)
+                                            (if booleano
+                                                (actualizarUsuariosReputacion listaUsuarios autorRes (cons + 10))
+                                                (actualizarUsuarios2Reput listaUsuarios votador autorRes (cons - 1) (cons - 2)))))
+                                                                                     
+
+;Actualizar una pregunta cuando se vota positivo o negativo, se suma un voto a donde corresponda
+(define modificarPregVot(lambda(ask booleano)
+                          (if booleano
+                              (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
+                                        (getEstadoPreg ask) (getVisualizacionesPreg ask) (+ 1 (getVfavorPreg ask)) (getVcontraPreg ask)
+                                        (getRecompensa ask) (getReportesPreg ask) (getRespuestas ask))
+                              (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
+                                        (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (+ 1 (getVcontraPreg ask))
+                                        (getRecompensa ask) (getReportesPreg ask) (getRespuestas ask)))))
+
+(define actualizarPreguntasVot(lambda(listaPreg idPreg booleano)
+                                (actualizar listaPreg idPreg getIdPreg modificarPregVot booleano)))
+                                
+                   
+;Actualizar un stack cuando el voto esta destinado a una pregunta.
+(define actualizarStackVotPreg(lambda(sta booleano funcion idPreg)
+                                (stack (actualizarUsuariosReputacionVotPreg (getUsuarios sta) (getAutorPreg ((funcion idPreg)(getPreguntas sta))) booleano)
+                                       emptyUser
+                                       (actualizarPreguntasVot (getPreguntas sta) idPreg booleano)
+                                       (getCorrPreg sta)(getCorrRes sta))))
 
 
-                      
-                      
+
+                                        
+                            
+                                     
+                        
+                        
+
+                            
+
+
+
+
+
+
 
 
 
