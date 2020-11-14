@@ -842,6 +842,86 @@ l
 (mostrarUsuarios usuarios1)
 (display (mostrarUsuarios usuarios1))
 
+;Función para mostrar una respuesta y sus correspondientes elementos.
+(define mostrarRespuesta(lambda(res)
+                          (list "ID:"(getIdRes res)
+                                "\nRespuesta:"(getContenidoRes res)
+                                "\nAutor:"(getAutorRes res)
+                                "\nFecha publicación:"(getFechaRes res)
+                                "\nEtiquetas:"(mostrarElementosList (getEtiquetasRes res))
+                                "\nEstado:"(getAceptacionRes res)
+                                "\nVotos a favor:"(getVfavorRes res)
+                                "\nVotos en contra:"(getVcontraRes res)
+                                "\nReportes:"(getReportesRes res)"\n")))
+;Ejemplo:
+a1
+(mostrarRespuesta a1)
+(display (mostrarRespuesta a1))
+
+;Función para mostrar una lista de respuestas.
+(define mostrarRespuestas(lambda(listaRes)
+                           (mostrarElementos listaRes mostrarRespuesta)))
+
+;Función para mostrar una pregunta.
+(define mostrarPregunta(lambda(preg)
+                         (list "ID Pregunta:"(getIdPreg preg)
+                                "\nTitulo pregunta:"(getTituloPreg (getContenidoPreg preg))
+                                "\nCuerpo pregunta:"(getCuerpoPreg (getContenidoPreg preg))
+                                "\nAutor:"(getAutorPreg preg)
+                                "\nFecha publicación:"(getFechaPreg preg)
+                                "\nEtiquetas:"(mostrarElementosList (getEtiquetasPreg preg))
+                                "\nEstado:"(getEstadoPreg preg)
+                                "\nVisualizaciones:"(getVisualizacionesPreg preg)
+                                "\nVotos a favor:"(getVfavorPreg preg)
+                                "\nVotos en contra:"(getVcontraPreg preg)
+                                "\nRecompensa:"(getValorRecompensa (getRecompensa preg))"puntos - Realizada por"(getOfertor (getRecompensa preg))
+                                "\nReportes:"(getReportesPreg preg)
+                                "\nRespuestas:\n"
+                                (mostrarRespuestas (getRespuestas preg))
+                                "\n")))
+
+;Ejemplo:
+(mostrarPregunta p1)
+(display (mostrarPregunta p1))
+(define mostrarPreguntas(lambda(listaPreg)
+                           (mostrarElementos listaPreg mostrarPregunta)))
+
+;Función que muestra todos las preguntas y sus respectivas respuestas de un usuario.
+(define mostrarPregUsuario(lambda(nomUsuario listaPreg)
+                            (if (null? listaPreg)
+                                emptyList
+                                (if (eqv? nomUsuario (getAutorPreg (primerElemento listaPreg)))
+                                    (cons (mostrarPregunta (primerElemento listaPreg)) (mostrarPregUsuario nomUsuario (siguientesElementos listaPreg)))
+                                    (mostrarPregUsuario nomUsuario (siguientesElementos listaPreg))))))
+;Ejemplo:
+(mostrarPregUsuario "Maria" preguntas1)
+(display (mostrarPregUsuario "Maria" preguntas1))
+
+(define mostrarElementosUsuarioActivo(lambda(usuario listaPreg)
+                                       (list "Usuario activo:\n"
+                                             (mostrarUsuario usuario)
+                                             "\nPreguntas:\n"
+                                             (mostrarPregUsuario (getNomUser usuario) listaPreg))))
+;Ejemplo:
+(mostrarElementosUsuarioActivo u1 preguntas1)
+(display (mostrarElementosUsuarioActivo u1 preguntas1))
+
+(define mostrarStack(lambda(sta)
+                      (list "Stack overflow:\n"
+                            "PERFILES DE USUARIOS:\n"
+                            (mostrarUsuarios (getUsuarios sta))
+                            "\nPREGUNTAS:\n"
+                            (mostrarPreguntas (getPreguntas sta)))))
+                      
+                                             
+
+(define stack->string(lambda(sta)
+                       (if (not(null? (getActivo sta)))
+                           (mostrarElementosUsuarioActivo (getActivo sta) (getPreguntas sta))
+                           (mostrarStack sta))))
+;Ejemplo:
+(stack->string stack1)
+(display (stack->string stack1))
 
 
 
