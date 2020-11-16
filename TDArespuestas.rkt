@@ -2,6 +2,7 @@
 (require "TDArespuesta.rkt")
 (require "FuncionesGenerales.rkt")
 (provide respuestas?)
+(provide emptyAnswers)
 
 ;TDA respuestas.
 ;Representación: una lista de TDAs respuestas (respuestas1, respuesta2,....,..,., respuestaN).

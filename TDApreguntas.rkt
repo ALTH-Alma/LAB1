@@ -34,6 +34,13 @@
   )
 
 
+(define actualizarPreguntasRecompensa(lambda (listaPreguntas id recompensa)
+                                       (actualizar id getIdPreg modificarPregRecompensa recompensa listaPreguntas)))
+
+
+
+;Ejemplo:
+(actualizarPreguntasRecompensa preguntas1 1 (recompensa "pepe" 20))
 
 ;Ejemplo:
 ;(preguntas? preguntas1)

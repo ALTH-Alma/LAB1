@@ -8,6 +8,7 @@
 
 
 (provide pregunta?)
+(provide modificarPregRecompensa)
 
 ;TDA Pregunta.
 ;Representación: lista(int id pregunta, string nombre del autor, TDAdate fecha de publicación, TDAcontenidoPreg contenido, lista de etiquetas,
@@ -102,6 +103,13 @@
                    )
   )
 
+;Dom: una pregunta y una recompensa.
+;Rec: una pregunta actualizada.
+;La función actualiza una pregunta agregandole una recompensa.
+(define modificarPregRecompensa(lambda(preg recompensa)
+                             (pregunta (getIdPreg preg) (getAutorPreg preg) (getFechaPreg preg) (getContenidoPreg preg) (getEtiquetasPreg preg)
+                              (getEstadoPreg preg) (getVisualizacionesPreg preg) (getVfavorPreg preg) (getVcontraPreg preg)
+                               recompensa (getReportesPreg preg) (getRespuestas preg))))
 
 
 

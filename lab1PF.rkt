@@ -14,8 +14,8 @@
 
 ;DESARROLLO FUNCIONES:
 
-;Función 1: register.
-;Dom: un TDAstack y 2 string (nombre y contraseña).
+;Función 2: register.
+;Dom: un stack y 2 string (nombre y contraseña).
 ;Rec: una estructura stack actualizada. (con el nuevo usuario registrado)
 ;Función que permite registrar a un nuevo usuario en el stack, para esto el nombre ingresado
 ;por el usuario que desea registrarse no puede pertener a ningun usuario ya existente en el stack.
@@ -36,13 +36,12 @@
 
 
 ;Ejemplo:
-(define l(list "-----------------------------------------------------------------"))
-l
+
 (register stack1 "Alma" "hi123")
 
 
-;Función 2: login.
-;Dom: un TDAstack, dos strings (nombre y contraseña) y una operación(función).
+;Función 3: login.
+;Dom: un stack, dos strings (nombre y contraseña) y una operación(función).
 ;Rec:
 ;Si se autentifica el usuario: función currificada para la operacion de parametro de entrada,
 ;parcialmente evaluada con el stack actualizado(usuario autentificado y registrado en sesión activa).
@@ -67,75 +66,43 @@ l
 ;(login stack1 "Ana" "A1234" ask)
 
 
-
-;FUNCION 3:funcion ask.
-
-;Ejemplo:
-(define l3(list "......................................"))
-l3
-    
-(define actualizarStackPreg(lambda(sta pregunta)
-                             (stack (getUsuarios sta) emptyUser (agregarElemento (getPreguntas sta) pregunta) (+ 1 (getCorrPreg sta)) (getCorrRes sta))))
-  
-  
-  
-                       
-(define ask(lambda(stack)
+;Función 4: ask.
+;Dom: un stack.
+;Rec:
+;Retorna una función currificada que opera sobre los argumentos fecha y contendido pregunta + lista de etiquetas.
+;El retorno final de la función es una versión actualizada del stack donde se registra la nueva pregunta, se elimina
+;al usuario en la sesión activa del stack y aumenta el correlativo de pregunta.
+;Función currificada que permite a un usuario con sesión iniciada en la plataforma realizar una nueva pregunta.
+;Cada pregunta registra el autor de la misma (obtenido desde la sesión iniciada con login), fecha de publicación,
+;la pregunta y 0 o más etiquetas (en este orden).
+;La función usa la función actualizarSatckPreg que resive un stack y una nueva pregunta, para realizar la modificación.
+                        
+(define ask(lambda(stack1)
              (lambda(fecha)
                (lambda(contenido etiquetas)
-               (actualizarStackPreg stack (pregunta (getCorrPreg stack)(getNomUser (getActivo stack)) fecha contenido etiquetas "abierta" 0 0 0 emptyReward 0 emptyAsk))))))
-
+                 (if (and (stack? stack1)(date? fecha)(contenidoPreg? contenido)(list? etiquetas)) ;si los datos ingresados son correctos.... actualizo stack.
+                     (actualizarStackPreg stack1 (pregunta (getCorrPreg stack1)(getNomUser (getActivo stack1)) fecha contenido etiquetas "abierta" 0 0 0 emptyReward 0 emptyAnswers))
+                     "Datos ingresados incorrectos" ;sino entrego un mensaje.
+                     )
+                 )
+               )
+             )
+  )
+  
 
 ;Ejemplo:
 l
 (((login stack1 "Ana" "A1234" ask)(date 30 10 11))(contenidoPreg "FUNCIONA?" "quiero saber si esta operacion funciona correctamente")(list "prueba" "programa"))
   
 
-;Función 6: ofrecer recompensa:
-(define puedeOfrecer(lambda(user montoRecompensa)
-                                (if(>= (getReputacion user) montoRecompensa)
-                                   true
-                                   false
-                                   )))
-
-(define emptylist null)
-(define actualizar(lambda(lista id getId modificar agregado)
-                                  (if (null? lista)
-                                      emptylist
-                                      (if(eqv? id (getId (primerElemento lista)))
-                                         (cons (modificar (primerElemento lista) agregado)(siguientesElementos lista))
-                                         (cons (primerElemento lista) (actualizar (siguientesElementos lista) id getId modificar agregado))
-                                         ))))
-
-(define modificarReputacion(lambda(user modificacion) ;Donde moficacion es un par que indica(operacion.monto). Ejemplo: (- . 20), (+ . 10), etc.
-                                     (usuario (getNomUser user) (getContraseña user) ((car modificacion) (getReputacion user) (cdr modificacion)) (getReferencias user))))
-
-(define actualizarUsuariosReputacion(lambda(listaUsuarios nombre operacion)
-                                      (actualizar listaUsuarios nombre getNomUser modificarReputacion operacion)))
-;Ejemplo:
-  l
-  l
-  l
-(actualizarUsuariosReputacion usuarios1 "Ana" (cons - 5))
-
-
-(define modificarPregRecompensa(lambda(ask recompensa)
-                             (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
-                              (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (getVcontraPreg ask)
-                               recompensa (getReportesPreg ask) (getRespuestas ask))))
-
-(define actualizarPreguntasRecompensa(lambda (listaPreguntas id recompensa)
-                                       (actualizar listaPreguntas id getIdPreg modificarPregRecompensa recompensa)))
-
-;Ejemplo:
-(actualizarPreguntasRecompensa preguntas1 1 (recompensa "pepe" 20))
+;Función 6: reward:
 
 ;Rec: una lista de preguntas, con la pregunta actualizada (agregada la recompensa).
 
 (define reward(lambda(sta)
   (lambda(idPreg)
     (lambda(montoRecompensa)
-     (if (puedeOfrecer (getUsuario (getNomUser (getActivo sta))(getUsuarios sta)) montoRecompensa)
+     (if (puedeOfrecerRecompensa? (getUsuario (getNomUser (getActivo sta))(getUsuarios sta)) montoRecompensa)
         (stack (actualizarUsuariosReputacion (getUsuarios sta) (getNomUser (getActivo sta)) (cons - montoRecompensa))
                emptyUser
                (actualizarPreguntasRecompensa (getPreguntas sta) idPreg (recompensa (getNomUser (getActivo sta)) montoRecompensa))
@@ -161,7 +128,7 @@ l
 ;Dom: TDApreguntas (lista de preguntas), int identificador de pregunta, TDApregunta nueva pregunta.
 ;Rec: un TDApreguntas actualizado, con la respuesta a la pregunta(id) agregada.
 (define actualizarPreguntasNewAns(lambda(listaPreg idPreg nuevPreg)
-                            (actualizar listaPreg idPreg getIdPreg agregarRespuestaApreg nuevPreg)))
+                            (actualizar idPreg getIdPreg agregarRespuestaApreg nuevPreg listaPreg)))
 
 
 ;ejemplo:
@@ -207,7 +174,7 @@ l
 ;Dom: lista de respuestas e identificador res
 ;Rec: Una lista de respuestas actualizada
 (define actualizarRespuestasAccept(lambda(listaRes idRes)
-                             (actualizar listaRes idRes getIdRes modificarResAccept "Aceptada")))
+                             (actualizar idRes getIdRes modificarResAccept "Aceptada"  listaRes)))
 
 ;Rec: una lista una pregunta y una lista de respuestas actualizada.
 ;Dom: un TDA pregunta actualizada, con sus respuestas actualizadas (respuesta aceptada) y sin recompensa.
@@ -303,7 +270,7 @@ l
                                         (getRecompensa ask) (getReportesPreg ask) (getRespuestas ask)))))
 
 (define actualizarPreguntasVot(lambda(listaPreg idPreg booleano)
-                                (actualizar listaPreg idPreg getIdPreg modificarPregVot booleano)))
+                                (actualizar idPreg getIdPreg modificarPregVot booleano listaPreg)))
                                 
                    
 ;Actualizar un stack cuando el voto esta destinado a una pregunta.
@@ -325,7 +292,7 @@ l
 ;Dom: una lista de respuestas el id de la respuesta y un booleano.
 ;Rec: una lista de preguntas actualizada con el voto realizado.
 (define actualizarResVot(lambda (listaRes idRes booleano)
-                          (actualizar listaRes idRes getIdRes modificarResVot booleano)))
+                          (actualizar idRes getIdRes modificarResVot booleano listaRes)))
 
   
 ;Rec: una lista una pregunta y una lista de respuestas actualizada.

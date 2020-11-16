@@ -1,5 +1,6 @@
 #lang racket
 
+(require "FuncionesGenerales.rkt")
 (require "TDAusuario.rkt")
 (require "TDAusuarios.rkt")
 (require "TDApreguntas.rkt")
@@ -77,10 +78,19 @@
 
 
 
+;Dom: un TDAstack y un TDApregunta.
+;Rec: un TDAstack actualizado.
+;La función actualiza el stack agregando una nueva pregunta, aumentando su correlativo de preguntas y eliminando al usuario de sesión activa.
+;Usa la función recursiva de cola "agregarElemento" para agregar la respuestas al TDApreguntas y de esta forma actualizar el stack, pues es
+;la forma más rápido de hacerlo.
+(define actualizarStackPreg(lambda(stack1 pregunta)
+                             (stack (getUsuarios stack1) emptyUser (agregarElemento (getPreguntas stack1) pregunta) (+ 1 (getCorrPreg stack1)) (getCorrRes stack1))))
+
+
 
 
 ;Ejemplo:
-(agregarAactivo stack1 "Ana")
+;(agregarAactivo stack1 "Ana")
 
 ;Ejemplo:
 (define stack1(stack usuarios1 emptyUser preguntas1 2 2))

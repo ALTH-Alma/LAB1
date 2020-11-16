@@ -2,13 +2,17 @@
 ;Este archivo contiene funciones generales que se utilizan en varios de los TDAs y funciones implementadas.
 (provide es?)
 (provide get)
+(provide actualizar)
 (provide primerElemento)
 (provide siguientesElementos)
 (provide agregarElemento)
 (provide mostrarElementosList)
 (provide emptyList)
+(provide l)
 
 (define emptyList null)
+(define l(list "-----------------------------------------------------------------"))
+
 
 ;Dom: una lista.
 ;Rec: un elemento de la lista.
@@ -52,7 +56,7 @@
              )
   )
      
-;Dom: un entero (identificador), una función get(función que selecciona un elemento de una lista) y una lista.
+;Dom: un identificador(puede ser un string, número, etc), una función getId(función que retorna el id de un elemento en una lista) y una lista.
 ;Rec: un elemento de la lista.
 ;La función permite buscar y obtener un elemento según su identificador(id), en una lista de elementos gracias a la función get.
 ;Es una función de orden superior que además utiliza recursión de cola, pues facilita el ir recorriendo toda la lista.
@@ -67,6 +71,28 @@
              )
   )
 
+;Dom: un identificador(puede ser string, número, etc), una función getId(función que retorna el id de un elemento de una lista),
+;un función modificar(puede ser cualquier función que pida como entrada un elemento de la lista y un dato extra(agregado), el
+;agregado(puede ser una operación o elemento: número, string, etc); los dos elementos anteriores dependeran de donde y para que
+;se utilice la fución actualizar, finalmente, recibe la lista de elementos.
+;Rec: una lista actualizada.
+;Esta función es similar a la función map o filter, utiliza recursión natural, pues reescribe una lista modificando un de sus
+;elementos, y de esta forma es más simple.
+(define actualizar(lambda(id getId modificar agregado lista)
+                    (if (null? lista) ;Si se llego al final de la lista o la lista estaba vacia se retorna un null.
+                        emptyList
+                        
+                        (if(eqv? id (getId (primerElemento lista))) ;si el elemento que se esta evaluando es el elemento buscado...
+                           
+                           ;se le aplica la función(se modifica) y se copia lo que queda de lista tal cual.
+                           (cons (modificar (primerElemento lista) agregado)(siguientesElementos lista))
+                           
+                           ;sino se une el elemento evaluado a los elementos que continuaran siendo evaluados por el llamado recursivo de actualizar.
+                           (cons (primerElemento lista) (actualizar id getId modificar agregado (siguientesElementos lista))) 
+                           )
+                        )
+                    )
+  )
 
 ;Dom: una lista.
 ;Rec: uns lista ordenada con comas y punto.

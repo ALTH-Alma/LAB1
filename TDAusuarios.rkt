@@ -6,13 +6,14 @@
 (provide noExisteNombre?)
 (provide autentificar)
 (provide getUsuario)
+(provide actualizarUsuariosReputacion)
 
 ;TDA usuarios.
 ;Representación: una lista de TDAs usuario (usuario1, usuario2,....,..,., usuarioN).
 
 ;Capa constructor.
 ;Dom: TDAs usuario.
-;Rec: TDA usuarios.
+;Rec: usuarios.
 (define emptyUsers null)
 (define (usuarios . usuario) usuario)
 
@@ -38,7 +39,7 @@
   )
 
 ;FUNCIONES EXTRAS:
-;Dom: un string nombre y un TDAusuarios (lista de usuarios).
+;Dom: un string nombre y usuarios (lista de usuarios).
 ;Rec: un booleano.
 ;La función busca si existe ya algún usuario en la lista que poseea el nombre que se da como argumento de entrada,
 ;si existe se retorna un false y sino un true.
@@ -56,7 +57,7 @@
   )
 
 
-;Dom: 2 string (nombre y contraseña) y un TDAusuarios (lista de usuarios).
+;Dom: 2 string (nombre y contraseña)y usuarios (lista de usuarios).
 ;Rec: un booleano.
 ;Función que autentifica a un usuario, es decir, se busca el usuario por su nombre en una lista
 ;de usuarios y se comprueba que su contraseña conincida con la contraseña ingresada, si se encuentra
@@ -75,8 +76,8 @@
                       )
   )
 
-;Dom: un string (nombre) y un TDAusuarios (lista de usuarios).
-;Rec: un TDAusuario.
+;Dom: un string (nombre) y usuarios (lista de usuarios).
+;Rec: un usuario.
 ;La función busca a un usuario por su nombre y cuando lo encuentra lo retorna.
 ;Utiliza la función recursiva y de oreden superior "get", combinada con getNomUser.
 (define getUsuario(lambda(nombre listaUsuarios)
@@ -84,16 +85,27 @@
                     )
   )
 
+;Dom: usuarios, un string (nombre), y una operacion (la operacion corresponde a un par que indica (suma/resta.monto). Ejemplo: (- . 20), (+ . 10), etc.).
+;Rec: usuarios actualizados.
+;La función actualiza una lista de usuarios(TDAusuarios) y lo que modifica es la reputacion de un de sus usuarios, segun los indique la operación.
+; utiliza la función recursiva "actualizar" ubicada en funciones generales.
+(define actualizarUsuariosReputacion(lambda(listaUsuarios nombre operacion)
+                                      (actualizar nombre getNomUser modificarReputacion operacion listaUsuarios)))
 
+
+
+
+;Ejemplo:
+;(actualizarUsuariosReputacion usuarios1 "Ana" (cons - 5))
 
 
 ;Ejemplo:
 ;(getUsuario "Ana" usuarios1)
 ;Ejemplo:
-(autentificar "Ana" "A1234" (getUsuarios stack1))
-(autentificar "Ana" "A123" (getUsuarios stack1)) 
-(autentificar "Ana" "" (getUsuarios stack1))
-(autentificar "Maria" "A1234" (getUsuarios stack1))
+;(autentificar "Ana" "A1234" (getUsuarios stack1))
+;(autentificar "Ana" "A123" (getUsuarios stack1)) 
+;(autentificar "Ana" "" (getUsuarios stack1))
+;(autentificar "Maria" "A1234" (getUsuarios stack1))
 
 
 
