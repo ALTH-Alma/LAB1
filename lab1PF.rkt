@@ -1,126 +1,11 @@
 #lang racket
-;TDAs stackoverflow.
-;_______________________________________________________________________________________________--
-;TDA date.
-;Representacion: lista( int dia, int mes, int año)
-;Capa constructor.
-(define emptyDate null)
-(define date(lambda( dia mes año)
-              (if(and (integer? dia)(integer? mes)(integer? año))
-                 (list dia mes año)
-                 emptyDate)))
-(date 1 2 2020)
-;Capa selector.
-(define getDia(lambda(date)(car date)))
-(define getMes(lambda(date)(car(cdr date))))
-(define getAño(lambda(date)(car(cdr(cdr date)))))
 
-;Capa pertenencia.
-(define date?(lambda(fecha)
-               (if(and(list? fecha)(integer? (getDia fecha))(integer? (getMes fecha))(integer? (getAño fecha)))
-                  true
-                  false)))
+(require "TDAdate.rkt")
+(require "TDArecompensa.rkt")
+(require "TDAcontenidoPregunta.rkt")
 
-(date? (date 2 3 2020))
 
-;TDA reportes.
-;Representación: par(int nReportes, lista de string reportes)
-;Capa constructor.
-(define emptyReport (cons 0 null))
-(define reportes(lambda( numero listaReportes)
-                  (if(and(integer? numero)(list? listaReportes))
-                     (cons numero listaReportes)
-                     null
-                     )
-                  )
-)
-;Ejemplo:
-(define l1(list "spam" "ofensivo" "incorrecto"))
-(define r1(reportes 3 l1))
-r1
-;Capa selector.
-(define getNumReportes(lambda(reportes)(car reportes)))
-(define getReportes(lambda(reportes)(cdr reportes)))
-;Ejemplo:
-(getNumReportes r1)
-(getReportes r1)
-
-;Capa pertenencia.
-(define reportes?(lambda(reportes)
-                   (if (null? reportes)
-                       true
-                       (if (and (pair? reportes) (integer? (getNumReportes reportes))(list? (getReportes reportes)))
-                           true
-                           false
-                           )
-                       )
-                   )
-  )
-;Ejemplos:
-(reportes? r1)
-(reportes? (cons 0 '()))
-(list? '())
-
-;Capa modificador.
-(define modificarLista(lambda(lista elemento)
-                        (if (null? lista)
-                            (cons elemento null)
-                            (cons (car lista) (modificarLista (cdr lista) elemento))
-                            )
-                        )
- )
-
-(define modificarReportes(lambda(reportes reporte)
-                        (if (string? reporte)
-                            (and (+ 1 (getNumReportes reportes)) (modificarLista (getReportes reportes) reporte))
-                            null
-                            )
-                        )
-)                       
-;Ejemplo:                        
-(define r2(modificarReportes r1 "ofensivo"))
-r2
 ;__________________________________________________________________________
-;TDA recompensa.
-;Representación: lista de dos elementos
-;Par (string ofertor,int valorRecompensa)
-;Capa constructor.
-(define emptyReward (cons "" 0))
-(define recompensa(lambda(ofertor vRecompensa)
-                    (if(and (string? ofertor)(integer? vRecompensa))
-                       (cons ofertor vRecompensa)
-                       null
-                       )
-                    )
-  )
-;Ejemplo:
-(define recompensa1(recompensa "Alma" 10))
-recompensa1
-
-;Capa selector.
-(define getOfertor(lambda(recompensa)(car recompensa)))
-(define getValorRecompensa(lambda(recompensa)(cdr recompensa)))
-;Ejemplos:
-(getOfertor recompensa1)
-(getValorRecompensa recompensa1)
-
-;Capa pertenencia.
-(define recompensa?(lambda(recompensa)
-                     (if (eqv? emptyReward recompensa)
-                         true
-                         (if(and (pair? recompensa)(string? (getOfertor recompensa))(integer? (getValorRecompensa recompensa)))
-                            true
-                            false
-                            )
-                         )
-                     )
-  )
-
-;Ejemplo:
-(recompensa? recompensa1)
-(recompensa? (cons 12 "hola"))
-
-;____________________________________________________________________________
 
 ;TDA respuesta.
 ;Representación: lista (int idRespuesta, string contenidoRes, string autor, string fecha, string aceptación(si/no), int votosAfavor,
@@ -274,24 +159,6 @@ u2
 
 ;Ejemplo:
 (usuarios? usuarios1)
-
-;TDA contenido.
-;Representacion: par(string titulo, string cuerpo)
-;Capa constructor.
-(define contenidoVacio null)
-(define contenidoPreg(lambda(titulo cuerpo)
-                       (if(and(string? titulo)(string? cuerpo))
-                          (cons titulo cuerpo)
-                          contenidoVacio
-                          )))
-;Capa selector.
-(define getTituloPreg (lambda(contenido)(car contenido)))
-(define getCuerpoPreg(lambda(contenido)(cdr contenido)))
-;Capa pertenencia.
-(define contenidoPreg?(lambda(contenido)
-                        (if(and(pair? contenido)(string? (getTituloPreg contenido))(string? (getTituloPreg contenido)))
-                           true
-                           false)))
 
 ;TDA Pregunta.
 ;Representaciòn: lista de elementos relevantes de un pregunta.
@@ -512,7 +379,7 @@ l3
 (define ask(lambda(stack)
              (lambda(fecha)
                (lambda(contenido etiquetas)
-               (actualizarStackPreg stack (pregunta (getCorrPreg stack)(getNomUser (getActivo stack)) fecha contenido etiquetas "abierta" 0 0 0 emptyReward emptyReport emptyAsk))))))
+               (actualizarStackPreg stack (pregunta (getCorrPreg stack)(getNomUser (getActivo stack)) fecha contenido etiquetas "abierta" 0 0 0 emptyReward 0 emptyAsk))))))
 
 
 ;Ejemplo:
@@ -603,7 +470,7 @@ l
                   (stack (getUsuarios sta)
                           emptyUser
                           (actualizarPreguntasNewAns (getPreguntas sta) idPreg
-                             (respuesta (getCorrRes sta) (getNomUser (getActivo sta)) fecha contenidoRes etiquetas "" 0 0 emptyReport))
+                             (respuesta (getCorrRes sta) (getNomUser (getActivo sta)) fecha contenidoRes etiquetas "" 0 0 0))
                           (getCorrPreg sta)
                           (+ 1 (getCorrRes sta))))))))
                   
@@ -921,7 +788,8 @@ a1
                            (mostrarStack sta))))
 ;Ejemplo:
 (stack->string stack1)
-(display (stack->string stack1))
+
+;(list->string(stack->string stack1))
 
 
 

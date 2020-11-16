@@ -1,0 +1,46 @@
+#lang racket
+
+(provide contenidoPreg)
+(provide getTituloPreg)
+(provide getCuerpoPreg)
+(provide contenidoPreg?)
+
+
+;TDA contenidoPregunta.
+;Se usa para para agregar el contenido de una pregunta.
+;Representación: par(string titulo, string cuerpo).
+
+;Capa constructor.
+;Dom: 2 strings.
+;Rec: un par.
+(define contenidoVacio null)
+(define contenidoPreg(lambda(titulo cuerpo)
+                       (if(and(string? titulo)(string? cuerpo))
+                          (cons titulo cuerpo)
+                          contenidoVacio
+                          )
+                       )
+ )
+
+;Capa selector.
+;Dom: ambas funciones tienen de entraga un TDA contenidoPreg.
+;Rec: ambas funciones entregan un string.
+;_____
+
+;Entrega el titulo de una pregunta.
+(define getTituloPreg (lambda(contenido)(car contenido)))
+
+;Entrega el cuerpo de la pregunta.
+(define getCuerpoPreg(lambda(contenido)(cdr contenido)))
+;____
+
+;Capa pertenencia.
+;Dom: un par.
+;Rec: un booleano.
+;Entrega un true si el par corresponde a un TDA contenidoPreg y un false si no.
+(define contenidoPreg?(lambda(par)
+                        (if(and(pair? par)(string? (getTituloPreg par))(string? (getTituloPreg par)))
+                           true
+                           false)
+                        )
+  )
