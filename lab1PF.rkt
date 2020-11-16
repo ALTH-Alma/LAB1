@@ -1,368 +1,72 @@
 #lang racket
 
+(require "FuncionesGenerales.rkt")
 (require "TDAdate.rkt")
 (require "TDArecompensa.rkt")
 (require "TDAcontenidoPregunta.rkt")
+(require "TDArespuesta.rkt")
+(require "TDArespuestas.rkt")
+(require "TDAusuario.rkt")
+(require "TDAusuarios.rkt")
+(require "TDApregunta.rkt")
+(require "TDApreguntas.rkt")
+(require "TDAstack.rkt")
 
+;DESARROLLO FUNCIONES:
 
-;__________________________________________________________________________
+;Función 1: register.
+;Dom: un TDAstack y 2 string (nombre y contraseña).
+;Rec: una estructura stack actualizada. (con el nuevo usuario registrado)
+;Función que permite registrar a un nuevo usuario en el stack, para esto el nombre ingresado
+;por el usuario que desea registrarse no puede pertener a ningun usuario ya existente en el stack.
+;Emplea recursion natural utilizando la función "agregarElemento" ubicada en el archivo Funcionesgenerales.rkt.
 
-;TDA respuesta.
-;Representación: lista (int idRespuesta, string contenidoRes, string autor, string fecha, string aceptación(si/no), int votosAfavor,
-;int votosEnContra, TDAreportes reporte)
-;Capa constructor.
-(define emptyAnswer null)
-(define respuesta(lambda( idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
-                 (if(and(integer? idRespuesta)(string? autor)(date? fecha)(string? contenidoRes)(list? etiquetas)
-                   (string? aceptacion)(integer? vFavor)(integer? vContra)(integer? reportesRes))
-                     (list idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
-                     emptyAnswer
-                    )
-                 )
- )
- ;Ejemplo:
-(define emptyList null)
-(define a1(respuesta 0 "Ana" (date 2 3 2020) "Los 12 meses" emptyList "Aceptada" 10 2 0))
-(define a2(respuesta 1 "Juan" (date 1 2 2020) "solo 1 mes, febrero" emptyList "Rechazada" 2 9 3))
-(define a3(respuesta 2 "Pedro" (date 1 2 2020) "Nose" emptyList "Rechazada" 4 5 6))
-(define a4(respuesta 3 "Ana" (date 2 3 2020) "365 días" emptyList "Aceptada" 12 2 0))
-a1
-a2
-
-;Capa selector.
-(define getIdRes(lambda(respuesta)(car respuesta)))
-(define getAutorRes(lambda(respuesta)(car(cdr respuesta))))
-(define getFechaRes(lambda(respuesta)(car(cdr(cdr respuesta)))))
-(define getContenidoRes(lambda(respuesta)(car(cdr(cdr(cdr respuesta))))))
-(define getEtiquetasRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr respuesta)))))))
-(define getAceptacionRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr respuesta))))))))
-(define getVfavorRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr(cdr respuesta)))))))))
-(define getVcontraRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr respuesta))))))))))
-(define getReportesRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr respuesta)))))))))))
-;Ejemplo:
-(getContenidoRes a1)
-(getReportesRes a1)
-(getVcontraRes a1)
-(getAutorRes a1)
-(getAceptacionRes a1)
-
-;Capa pertenencia.
-(define respuesta?(lambda(lista)
-                    (if (null? lista)
-                        true
-                        (if(and(list? lista)(integer? (getIdRes lista))(string? (getContenidoRes lista))(string? (getAutorRes lista) )(date? (getFechaRes lista))
-                               (string? (getAceptacionRes lista))(integer? (getVfavorRes lista))(integer? (getVcontraRes lista))(integer? (getReportesRes lista)))
-                           true
-                           false
-                           )
-                        )
-                    )
-  )
-;Ejemplo:
-(respuesta? a1)
-
-;TDA respuestas.
-;Representacion: lista de TDAs respuestas.
-;Capa constructor.
-(define (respuestas . respuesta) respuesta)
-;Ejemplo:
-(define sinRespuestasAun null)
-(define respuestas1(respuestas a1 a2 a3))
-(define respuestas2(respuestas a4))
-respuestas1
-
-;Capa selector.
-(define primerElemento(lambda(lista)(car lista)))
-(define siguientesElementos(lambda(lista)(cdr lista)))
-;Ejemplo:
-(primerElemento respuestas1)
-
-;Capa pertenencia.
-(define es?(lambda(eso? lista)
-                     (if (and (eso? (primerElemento lista))(null? (siguientesElementos lista)))
-                         true
-                        (if (and (eso? (primerElemento lista)) (list? (siguientesElementos lista)))
-                            (es? eso? (siguientesElementos lista))
-                            false
-                            )
-                        )
-                     )
-  )
-
-(define respuestas?(lambda(lista)
-                     (if (null? lista)
-                         true
-                         (es? respuesta? lista))))
-;Ejemplo:
-(respuestas? respuestas1)
-;__________________________________________________________________________________________________________
-
-;TDA usuario.
-;Rpresentación: lista( string nombre, string contraseña, int reputación, lista de referencias)
-;Capa constructor.
-(define emptyUser null)
-(define usuario(lambda( nombre contraseña reputacion referencias)
-                 (if(and (string? nombre)(string? contraseña)(integer? reputacion)(list? referencias))
-                    (list nombre contraseña reputacion referencias)
-                    emptyUser
-                    )
-                 )
- )
-;Ejemplo:
-(define refe(list "python" "c++"))
-(define u1(usuario "Maria" "Maria1999" 20 refe))
-(define u2(usuario "Ana" "A1234" 30 refe))
-u1
-u2
-;Capa selector.
-
-(define getNomUser(lambda(usuario)(car usuario)))
-(define getContraseña(lambda(usuario)(car(cdr usuario))))
-(define getReputacion(lambda(usuario)(car(cdr(cdr usuario)))))
-(define getReferencias(lambda(usuario)(car(cdr(cdr(cdr usuario))))))
-;Ejemplo:
-(getReferencias u1)
-(getReputacion u1)
-(getNomUser u1)
-
-;Capa pertenencia.
-(define usuario?(lambda(usuario)
-                  (if (null? usuario)
-                      true
-                      (if(and (list? usuario)(string? (getNomUser usuario))(string? (getContraseña usuario))
-                      (integer? (getReputacion usuario))(list? (getReferencias usuario)))
-                         true
-                         false
-                         )
-                      )
-                  )
-  )
-                     
-
-
-;TDA usuarios.
-;Representacion: lista de usuarios.
-;Capa constructor.
-(define emptyUsers null)
-(define (usuarios . usuario) usuario)
-;Ejemplo:
-(define usuarios1 (usuarios u1 u2))
-
-;La capa selector se reutiliza 
-;(define primerElemento(lambda(lista)(car lista)))
-;(define siguientesElementos(lambda(lista)(cdr lista)))
-;Capa pertenencia
-(define usuarios? (lambda(lista)
-                    (if (null? lista)
-                        true
-                        (es? usuario? lista))))
-
-;Ejemplo:
-(usuarios? usuarios1)
-
-;TDA Pregunta.
-;Representaciòn: lista de elementos relevantes de un pregunta.
-;list (int idPregunta, TDA contenido, string autor, string fechaPublicacion,
-;string estado(abierta/cerrada), int nVisualizaciones, int votAFavor,
-;int votEnContra, lista etiquetas, TDArecompensa recompensa, TDAreportes reportes, TDA respuestas)
-
-(define emptyAsk null)
-
-(define pregunta(lambda
-   (idPregunta autor fechaPublicacion contenido etiquetas estado nVisualizaciones votAfavor votEnContra  recompensa reportes respuestas)
-                  (if(and(integer? idPregunta)(string? autor)(date? fechaPublicacion)(contenidoPreg? contenido)(list? etiquetas)
-                  (string? estado)(integer? nVisualizaciones)(integer? votAfavor)(integer? votEnContra)(recompensa? recompensa)
-                  (integer? reportes)(respuestas? respuestas))
-                     (list idPregunta autor fechaPublicacion contenido etiquetas estado nVisualizaciones votAfavor votEnContra recompensa reportes respuestas)
-                     emptyAsk
-                     )
-                  )
-  )
-;Ejemplo:
-(define p1(pregunta 0  "Maria" (date 29 2 2020) (cons "Duda" "¿cuantos meses tienen 29 dias?") '() "abierta" 10 3 2  (recompensa "Maria" 10) 1 respuestas1))
-(define p2(pregunta 1 "Ana" (date 29 12 2020) (cons "kahdja" "¿jahjajjkaldlsajahn?")(list "lkal") "abierta" 20 5 9 emptyReward 0 emptyAnswer))
-(define p3(pregunta 2  "Maria" (date 30 2 2020) (cons "Año" "¿cuantos dias tiene un año?") '() "abierta" 1 1 0  (recompensa "Ana" 5) 3 respuestas2))
-p1
-p2
-;Capa selector.
-(define getIdPreg(lambda(pregunta)(car pregunta)))
-(define getAutorPreg(lambda(pregunta)(car(cdr pregunta))))
-(define getFechaPreg(lambda(pregunta)(car(cdr(cdr pregunta)))))
-(define getContenidoPreg(lambda(pregunta)(car(cdr(cdr(cdr pregunta))))))
-(define getEtiquetasPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr pregunta)))))))
-(define getEstadoPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr pregunta))))))))
-(define getVisualizacionesPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr pregunta)))))))))
-(define getVfavorPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta))))))))))
-(define getVcontraPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta)))))))))))
-(define getRecompensa(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta))))))))))))
-(define getReportesPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta)))))))))))))
-(define getRespuestas(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta))))))))))))))
-(define o(list "oooooooooooooooooooooooo"))
-o
-(getRespuestas p1)
-(getRespuestas p2)
-  
-;Capa pertenencia.
-  (define pregunta?(lambda(ask)
-                     (if(null? ask)
-                        true
-                        (if(and(list? ask)(integer? (getIdPreg ask))(contenidoPreg? (getContenidoPreg ask))(string? (getAutorPreg ask))
-                               (date? (getFechaPreg ask))(string? (getEstadoPreg ask))(integer? (getVisualizacionesPreg ask))
-                               (integer? (getVfavorPreg ask))(integer? (getVcontraPreg ask))(list? (getEtiquetasPreg ask))
-                               (recompensa? (getRecompensa ask))(integer? (getReportesPreg ask))(respuestas? (getRespuestas ask)))
-                           true
-                           false
-                           )
-                        )
-                     )
-    )
-;Ejemplo:
-(pregunta? p1)
-
-;TDA preguntas.
-;Representacion: lista de preguntas.
-;Capa constructor.
-(define (preguntas . pregunta) pregunta)
-;Ejemplo:
-(define preguntas1(preguntas p1 p2 p3))
-preguntas1
-
-;La capa selector se reutiliza 
-;(define primerElemento(lambda(lista)(car lista)))
-;(define siguientesElementos(lambda(lista)(cdr lista)))
-;Capa pertenencia
-(define preguntas? (lambda(lista)
-                    (es? pregunta? lista)))
-;Ejemplo:
-(preguntas? preguntas1)
-
-
-;TDA stack.
-;Representación: lista(TDAusuarios todos, TDAusuarios activos, TDApreguntas lista de preguntas)
-;Capa constructor.
-(define emptyStack null)
-(define stack(lambda(perfiles perfilActivo listaPreguntas correlativoPreg correlativoRes)
-               (if(and(usuarios? perfiles)(usuario? perfilActivo)(preguntas? listaPreguntas)(integer? correlativoPreg)(integer? correlativoRes))
-                  (list perfiles perfilActivo listaPreguntas correlativoPreg correlativoRes)
-                  emptyStack
-                  )
-               )
-  )
-
-;Ejemplo:
-(define stack1(stack usuarios1 '() preguntas1 2 2))
-(define l2(list "------------------------------"))
-  l2
-usuarios1
-(usuarios? usuarios1)
-preguntas1
-(preguntas? preguntas1)
-stack1
-;Capa selector.
-(define getUsuarios(lambda(stack)(car stack)))
-(define getActivo(lambda(stack)(car(cdr stack))))
-(define getPreguntas(lambda(stack)(car(cdr(cdr stack)))))
-(define getCorrPreg(lambda(stack)(car(cdr(cdr(cdr stack))))))
-(define getCorrRes(lambda(stack)(car(cdr(cdr(cdr(cdr stack)))))))
-;Ejemplo:
-(getCorrPreg stack1)
-
-;Ejemplo:
-;(getUsuarios stack1)
-
-
-;Desarrollo funciones obligatorias:
-;Función1: register.
-(define noExisteNombre?(lambda(nombre listaUsuarios)
-                        (if (null? listaUsuarios)
-                            true
-                            (if(eqv? nombre (getNomUser(primerElemento listaUsuarios)))
-                               false
-                               (noExisteNombre? nombre (siguientesElementos listaUsuarios))
-                               )
-                            )
-                        )
-  )
-
-;Dom: una lista y un elemento.
-;Rec: una lista.
-;La funcion agrega un elemento al final de una lista.
-;Utiliza recursion natural.
-(define agregarElemento(lambda (lista elemento)
-             (if (null? lista)
-                 (cons elemento null)
-                 (cons (car lista) (agregarElemento (cdr lista) elemento))
-                 )
-             )
-  )
-                            
-
-(define register(lambda(stack nombre contraseña)
-                  (if (noExisteNombre? nombre (getUsuarios stack))
-                      (usuarios (agregarElemento (getUsuarios stack) (usuario nombre contraseña 0 '())) (getActivo stack)(getPreguntas stack))
-                      stack
-                      )
-                  )
-  )
+(define register(lambda(stack1 nombre contraseña)
+                  (if (and (stack? stack1)(string? nombre)(string? contraseña)) ;si los datos ingresados son correctos.
                       
+                      (if (noExisteNombre? nombre (getUsuarios stack1)) ;se confirma que el nombre no pertenezca a ningun usario existente.
+                          (stack (agregarElemento (getUsuarios stack1) (usuario nombre contraseña 0 emptyList)) (getActivo stack1)
+                                 (getPreguntas stack1)(getCorrPreg stack1)(getCorrRes stack1)) ;se agrega el usuario y se actualiza stack.
+                          stack ;Sino re retorna el stack tal cual.
+                          )
+                      )
+                  stack ;si los datos de entrada son incorrectos se retorna el stack tal cual.
+                  )
+  )
+
+
 ;Ejemplo:
 (define l(list "-----------------------------------------------------------------"))
 l
 (register stack1 "Alma" "hi123")
 
 
-;Función: login.
+;Función 2: login.
+;Dom: un TDAstack, dos strings (nombre y contraseña) y una operación(función).
+;Rec:
+;Si se autentifica el usuario: función currificada para la operacion de parametro de entrada,
+;parcialmente evaluada con el stack actualizado(usuario autentificado y registrado en sesión activa).
+;Sino: la operación.
+;La función permite iniciar sesión a un usuario registrado y autentificado, además, permite la ejecución
+;de comandos concretos dentro del stack (operaciones).
+;Utiliza una función de orden superior y recursiva de cola llamada "get" utilizada en la función "getUsuario"
+;de la función "agregarAactivo".
 
-;Función para autentificar a un usuario
-(define autentificar(lambda(nombre contraseña listaUsuarios)
-                        (if (null? listaUsuarios) ;Se llego al final de la lista
-                            false ;No existe usuario/nombre equivocado
-                            (if(eqv? nombre (getNomUser(primerElemento listaUsuarios))) ;Encontro al usuario
-                               (if(eqv? contraseña (getContraseña (primerElemento listaUsuarios)))
-                               true ;Existe usuario y su clave es correcta
-                               false) ;Existe usuario pero su clave no es correcta.
-                              (autentificar nombre contraseña (siguientesElementos listaUsuarios)); aun no encuentra al usuario sigue avanzando en la lista
-                               )
-                            )
-                        )
-)
-;Ejemplo:
-(autentificar "Ana" "A1234" (getUsuarios stack1))
-(autentificar "Ana" "A123" (getUsuarios stack1)) 
-(autentificar "Ana" "" (getUsuarios stack1))
-(autentificar "Maria" "A1234" (getUsuarios stack1))
-
-
-(define get(lambda(id getId lista)
-                          (if(eqv? id (getId (primerElemento lista)))
-                             (primerElemento lista)
-                             (get id getId (siguientesElementos lista))
-                             )
-                          )
-)
-(define getUsuario(lambda(nombre listaUsuarios)
-                    (get nombre getNomUser listaUsuarios))) ;Funcion de orden superior (toma como parametro otra funcion)
-;Ejemplo:
-;(getUsuario "Ana" usuarios1)
-(define agregarAactivo(lambda(sta nombre)
-                         (stack (getUsuarios sta)(getUsuario nombre (getUsuarios sta))(getPreguntas sta)(getCorrPreg sta)(getCorrRes sta))))
-
-;Ejemplo:
-(agregarAactivo stack1 "Ana")
-
-;Funcion map:
-
-;login
-(define login(lambda(stack nombre contraseña operacion)
-               (if(autentificar nombre contraseña (getUsuarios stack))
-                  (operacion (agregarAactivo stack1 nombre))
-                  operacion
-                  )
+(define login(lambda(stack1 nombre contraseña operacion)
+               (if (and (stack? stack1)(string? nombre)(string? contraseña)) ;si los datos ingresados son correctos...
+                   (if(autentificar nombre contraseña (getUsuarios stack1)) ;y si se encuntra al usuario y su contraseña es correcta..
+                      (operacion (agregarAactivo stack1 nombre)) ;se evalua la operación currificada con el stack actualizado(gracias a la función agregarAactivo). 
+                      operacion ;sino se retorna la operación.
+                      )
+                   operacion ;si los datos ingresados son incorrectos se retorna la operación.
+                   )
                )
   )
                   
 ;Ejemplo:
 ;(login stack1 "Ana" "A1234" ask)
+
+
 
 ;FUNCION 3:funcion ask.
 
@@ -709,21 +413,6 @@ l
 (mostrarUsuarios usuarios1)
 (display (mostrarUsuarios usuarios1))
 
-;Función para mostrar una respuesta y sus correspondientes elementos.
-(define mostrarRespuesta(lambda(res)
-                          (list "ID:"(getIdRes res)
-                                "\nRespuesta:"(getContenidoRes res)
-                                "\nAutor:"(getAutorRes res)
-                                "\nFecha publicación:"(getFechaRes res)
-                                "\nEtiquetas:"(mostrarElementosList (getEtiquetasRes res))
-                                "\nEstado:"(getAceptacionRes res)
-                                "\nVotos a favor:"(getVfavorRes res)
-                                "\nVotos en contra:"(getVcontraRes res)
-                                "\nReportes:"(getReportesRes res)"\n")))
-;Ejemplo:
-a1
-(mostrarRespuesta a1)
-(display (mostrarRespuesta a1))
 
 ;Función para mostrar una lista de respuestas.
 (define mostrarRespuestas(lambda(listaRes)

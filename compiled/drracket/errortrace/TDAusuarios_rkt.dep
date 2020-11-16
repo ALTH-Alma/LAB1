@@ -1,0 +1,1 @@
+("7.8" racket ("609f21c129dfa1532c3e63d02cd5150cbf44e71a" . "5faef18c51f4fffdd4447b081bc4216b240ef2d2") #"C:\\Users\\Alma\\Desktop\\LAB1-PF\\LAB1\\FuncionesGenerales.rkt" #"C:\\Users\\Alma\\Desktop\\LAB1-PF\\LAB1\\TDAusuario.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

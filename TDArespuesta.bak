@@ -1,0 +1,117 @@
+#lang racket
+(require "TDAdate.rkt")
+(require "TDArecompensa.rkt")
+(require "FuncionesGenerales.rkt")
+
+(provide emptyAnswer)
+(provide respuesta)
+(provide getIdRes)
+(provide getAutorRes)
+(provide respuesta?)
+(provide a1)
+(provide a2)
+(provide a3)
+(provide a4)
+
+
+;TDA respuesta.
+;Representación: lista(int id respuesta, string autor, TDAdate fecha, string contenido respuesta, una lista de etiquetas, string estado (Aceptada/Rechazada), int votos a favor,
+;int votos en contra, int reportes).
+
+;Capa constructor.
+;Dom: 4 enteros, 3 strings, una lista y un TDAdate.
+;Rec: un TDA respuesta.
+(define emptyAnswer null)
+(define respuesta(lambda( idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
+                   (if(and(integer? idRespuesta)(string? autor)(date? fecha)(string? contenidoRes)(list? etiquetas)
+                          (string? aceptacion)(integer? vFavor)(integer? vContra)(integer? reportesRes))
+                      (list idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
+                      emptyAnswer
+                      )
+                   )
+)
+
+;Capa selector.
+;Dom: todas las funciones de la capa selector reciben por entrada un TDA respuesta.
+;________
+
+;Rec: un entero.
+;Entrega el id de una respuesta.
+(define getIdRes(lambda(respuesta)(car respuesta)))
+
+;Rec: un string.
+;Entrega el nombre del autor de una respuesta.
+(define getAutorRes(lambda(respuesta)(car(cdr respuesta))))
+
+;Rec: un TDA date.
+;Entrega la fecha de publicación de una respuesta.
+(define getFechaRes(lambda(respuesta)(car(cdr(cdr respuesta)))))
+
+;Rec: un string.
+;Entrega el contenido de una respuesta.
+(define getContenidoRes(lambda(respuesta)(car(cdr(cdr(cdr respuesta))))))
+
+;Rec: un lista.
+;Entrega la lista de etiquetas de una respuesta.
+(define getEtiquetasRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr respuesta)))))))
+
+;Rec: un string.
+;Entrega el estado de una respuesta.
+(define getAceptacionRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr respuesta))))))))
+
+;Rec: un entero.
+;Entrega los votos a favor de una respuesta.
+(define getVfavorRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr(cdr respuesta)))))))))
+
+;Rec: un entero.
+;Entrega los votos en contra de una respuesta.
+(define getVcontraRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr respuesta))))))))))
+
+;Rec: un entero.
+;Entrega los reportes de una respuesta.
+(define getReportesRes(lambda(respuesta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr respuesta)))))))))))
+;_______
+
+;Capa pertenencia.
+;Dom: una lista.
+;Rec: un booleano.
+;Entrega un true si la lista corresponde a un TDA respuesta y un false sino.
+(define respuesta?(lambda(lista)
+                    (if (null? lista)
+                        true
+                        (if(and(list? lista)(integer? (getIdRes lista))(string? (getContenidoRes lista))(string? (getAutorRes lista) )(date? (getFechaRes lista))
+                               (string? (getAceptacionRes lista))(integer? (getVfavorRes lista))(integer? (getVcontraRes lista))(integer? (getReportesRes lista)))
+                           true
+                           false
+                           )
+                        )
+                    )
+  )
+;Funciones de aplicación:
+
+;Dom: un TDA respuesta
+;Rec: una lista.
+;Función que ordena todos los elementos de una respuesta utilizando una lista y strings. Muestra una respuesta estructurada.
+;Posteriormente se utiliza para mostrar un stack o parte de un stack en un gran string que puede verse ordenado con la función display.
+(define mostrarRespuesta(lambda(res)
+                          (list "ID:"(getIdRes res)
+                                "\nRespuesta:"(getContenidoRes res)
+                                "\nAutor:"(getAutorRes res)
+                                "\nFecha publicación:"(getFechaRes res)
+                                "\nEtiquetas:"(mostrarElementosList (getEtiquetasRes res))
+                                "\nEstado:"(getAceptacionRes res)
+                                "\nVotos a favor:"(getVfavorRes res)
+                                "\nVotos en contra:"(getVcontraRes res)
+                                "\nReportes:"(getReportesRes res)"\n")))
+
+
+
+;Ejemplo:
+(define a1(respuesta 0 "Ana" (date 2 3 2020) "Los 12 meses" emptyList "Aceptada" 10 2 0))
+(define a2(respuesta 1 "Juan" (date 1 2 2020) "Solo 1 mes, febrero" emptyList "Rechazada" 2 9 3))
+(define a3(respuesta 2 "Pedro" (date 1 2 2020) "Nose" emptyList "Rechazada" 4 5 6))
+(define a4(respuesta 3 "Ana" (date 2 3 2020) "365 días" emptyList "Aceptada" 12 2 0))
+
+;Ejemplo:
+;(mostrarRespuesta a1)
+;(display (mostrarRespuesta a1))

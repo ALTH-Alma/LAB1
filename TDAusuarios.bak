@@ -1,0 +1,38 @@
+#lang racket
+(require "FuncionesGenerales.rkt")
+(require "TDAusuario.rkt")
+
+(provide usuarios?)
+;TDA usuarios.
+;Representación: una lista de TDAs usuario (usuario1, usuario2,....,..,., usuarioN).
+
+;Capa constructor.
+;Dom: TDAs usuario.
+;Rec: TDA usuarios.
+(define emptyUsers null)
+(define (usuarios . usuario) usuario)
+
+
+;Capa selector.
+;Utiliza las funciones "primerElemento" y "siguientesElementos" encontradas en el archivo
+;"funcionesGenerales" como funciones de capa selector.
+
+
+;Capa pertenencia.
+;Dom: una lista.
+;Rec: un booleano.
+;Entrega un true si las lista entregada corresponde a un TDA usuarios y sino un false.
+;Esta función utiliza la función recursiva "es?" ubicada "funcionesGenerales" para ir
+;verificando si cada elemento de la lista corresponde a un usuario y de esta forma saber
+;si es un TDA usuarios.
+(define usuarios? (lambda(lista)
+                    (if (null? lista)
+                        true
+                        (es? usuario? lista)
+                        )
+                    )
+  )
+
+;Ejemplo:
+(provide usuarios1)
+(define usuarios1 (usuarios u1 u2))
