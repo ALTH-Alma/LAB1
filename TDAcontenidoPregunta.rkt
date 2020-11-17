@@ -12,7 +12,7 @@
 
 ;Capa constructor.
 ;Dom: 2 strings.
-;Rec: un par.
+;Rec: un contenidoPreg (contenido de pregunta).
 (define contenidoVacio null)
 (define contenidoPreg(lambda(titulo cuerpo)
                        (if(and(string? titulo)(string? cuerpo))
@@ -23,7 +23,7 @@
  )
 
 ;Capa selector.
-;Dom: ambas funciones tienen de entraga un TDA contenidoPreg.
+;Dom: ambas funciones tienen de entraga un contenidoPreg.
 ;Rec: ambas funciones entregan un string.
 ;_____
 
@@ -37,7 +37,7 @@
 ;Capa pertenencia.
 ;Dom: un par.
 ;Rec: un booleano.
-;Entrega un true si el par corresponde a un TDA contenidoPreg y un false si no.
+;Entrega un true si el par corresponde a un contenidoPreg y un false si no.
 (define contenidoPreg?(lambda(par)
                         (if(and(pair? par)(string? (getTituloPreg par))(string? (getTituloPreg par)))
                            true

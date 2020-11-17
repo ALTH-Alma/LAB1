@@ -13,7 +13,7 @@
 
 ;Capa constructor.
 ;Dom: un string correpondiente al nombre de ofertor de la recompensa y un entero representando el valor de la recompensa ofrecida.
-;Rec: una recompensa.
+;Rec: un TDA recompensa.
 (define emptyReward (cons "" 0))
 (define recompensa(lambda(ofertor vRecompensa)
                     (if(and (string? ofertor)(integer? vRecompensa)(> vRecompensa 0))
@@ -24,7 +24,7 @@
   )
 
 ;Capa selector.
-;Dom: ambas funciones tienen por entrada una recompensa.
+;Dom: ambas funciones tienen por entrada un TDA recompensa.
 ;_____
 
 ;Rec: un string.
@@ -39,7 +39,7 @@
 ;Capa pertenencia.
 ;Dom: un par.
 ;Rec: un booleano.
-;Función que entrega un true si el par correponde a una recompensa, sino un false.
+;Función que entrega un true si el par correponde a un TDA recompensa, sino un false.
 (define recompensa?(lambda(recompensa)
                      (if (eqv? emptyReward recompensa)
                          true

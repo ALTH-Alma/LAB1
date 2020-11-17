@@ -61,8 +61,8 @@
 ;La función permite buscar y obtener un elemento según su identificador(id), en una lista de elementos gracias a la función get.
 ;Es una función de orden superior que además utiliza recursión de cola, pues facilita el ir recorriendo toda la lista.
 (define get(lambda(id getId lista)
-             (if (null? lista) ;si se llego al final de la lista o es una lista vacia, el objeto no existia--> error.
-                 "Error"
+             (if (null? lista) ;si se llego al final de la lista o es una lista vacia, el objeto no existia--> entrega una lista vacia.
+                 emptyList
                  (if(eqv? id (getId (primerElemento lista))) ;si el elemento principal es el buscado...
                     (primerElemento lista) ;se retorna
                     (get id getId (siguientesElementos lista)) ;sino se sigue buscando en los demas elementos de la lista.

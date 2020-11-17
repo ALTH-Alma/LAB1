@@ -12,6 +12,7 @@
 (provide getCorrPreg)
 (provide getCorrRes)
 (provide agregarAactivo)
+(provide actualizarStackPreg)
 
 
 ;TDA stack.

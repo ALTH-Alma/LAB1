@@ -9,6 +9,8 @@
 (provide getFechaRes)
 (provide getAutorRes)
 (provide respuesta?)
+(provide modificarResAccept)
+(provide modificarResVot)
 (provide a1)
 (provide a2)
 (provide a3)
@@ -16,12 +18,12 @@
 
 
 ;TDA respuesta.
-;Representación: lista(int id respuesta, string autor, TDAdate fecha, string contenido respuesta, una lista de etiquetas, string estado (Aceptada/Rechazada), int votos a favor,
+;Representación: lista(int id respuesta, string autor, date fecha, string contenido respuesta, una lista de etiquetas, string estado (Aceptada/Rechazada), int votos a favor,
 ;int votos en contra, int reportes).
 
 ;Capa constructor.
-;Dom: 4 enteros, 3 strings, una lista y un TDAdate.
-;Rec: un TDA respuesta.
+;Dom: 4 enteros, 3 strings, una lista y un date.
+;Rec: una respuesta.
 (define emptyAnswer null)
 (define respuesta(lambda( idRespuesta autor fecha contenidoRes etiquetas aceptacion vFavor vContra reportesRes)
                    (if(and(integer? idRespuesta)(string? autor)(date? fecha)(string? contenidoRes)(list? etiquetas)
@@ -33,7 +35,7 @@
 )
 
 ;Capa selector.
-;Dom: todas las funciones de la capa selector reciben por entrada un TDA respuesta.
+;Dom: todas las funciones de la capa selector reciben por entrada una respuesta.
 ;________
 
 ;Rec: un entero.
@@ -76,7 +78,7 @@
 ;Capa pertenencia.
 ;Dom: una lista.
 ;Rec: un booleano.
-;Entrega un true si la lista corresponde a un TDA respuesta y un false sino.
+;Entrega un true si la lista corresponde a una respuesta y un false sino.
 (define respuesta?(lambda(lista)
                     (if (null? lista)
                         true
@@ -88,7 +90,29 @@
                         )
                     )
   )
-;Funciones de aplicación:
+
+
+
+;FUNCIONES EXTRAS:
+
+;Dom: una respuesta y un string (aceptación: Acceptada/Rechaza).
+;Rec: una respuesta actualizada.
+;La función midifica una respuesta, cambiando su estado de aceptación.
+(define modificarResAccept(lambda(res aceptacion)
+                        (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) aceptacion (getVfavorRes res)
+                                   (getVcontraRes res) (getReportesRes res))))
+
+
+;Dom: una respuesta y un booleano.
+;Rec: una respuesta actualizada.
+;La función reescribe una respuesta agregandole un voto a favor o en contra según el booleano.
+;Si el booleano es true se suma 1 voto a favor y si es false se suma un voto en contra.
+(define modificarResVot(lambda(res booleano)
+                         (if booleano
+                             (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
+                                        (+ 1 (getVfavorRes res)) (getVcontraRes res) (getReportesRes res))
+                             (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
+                                        (getVfavorRes res) (+ 1 (getVcontraRes res)) (getReportesRes res)))))
 
 ;Dom: un TDA respuesta
 ;Rec: una lista.

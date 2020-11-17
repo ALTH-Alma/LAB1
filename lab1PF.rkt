@@ -23,21 +23,18 @@
 
 (define register(lambda(stack1 nombre contraseña)
                   (if (and (stack? stack1)(string? nombre)(string? contraseña)) ;si los datos ingresados son correctos.
-                      
                       (if (noExisteNombre? nombre (getUsuarios stack1)) ;se confirma que el nombre no pertenezca a ningun usario existente.
                           (stack (agregarElemento (getUsuarios stack1) (usuario nombre contraseña 0 emptyList)) (getActivo stack1)
                                  (getPreguntas stack1)(getCorrPreg stack1)(getCorrRes stack1)) ;se agrega el usuario y se actualiza stack.
-                          stack ;Sino re retorna el stack tal cual.
-                          )
-                      )
-                  stack ;si los datos de entrada son incorrectos se retorna el stack tal cual.
+                          stack1) ;Sino re retorna el stack tal cual.  
+                      stack1) ;si los datos de entrada son incorrectos se retorna el stack tal cual.
                   )
   )
 
 
 ;Ejemplo:
 
-(register stack1 "Alma" "hi123")
+;(register stack1 "Alma" "hi123")
 
 
 ;Función 3: login.
@@ -92,187 +89,114 @@
 
 ;Ejemplo:
 l
-(((login stack1 "Ana" "A1234" ask)(date 30 10 11))(contenidoPreg "FUNCIONA?" "quiero saber si esta operacion funciona correctamente")(list "prueba" "programa"))
+;(((login stack1 "Ana" "A1234" ask)(date 30 10 11))(contenidoPreg "FUNCIONA?" "quiero saber si esta operacion funciona correctamente")(list "prueba" "programa"))
   
 
-;Función 6: reward:
+;Función 6: reward.
+;Dom: un stack.
+;Rec:
+;Retorna una función currificada que opera sobre los argumentos idPregunta y un entero(montoRecompensa).
+;El retorno final de la función es una versión actualizada del stack, donde se agrega la recompensa a una
+;pregunta, se descuenta el monto de la recompensa ofrecida al usuario en sesión activa (el monto queda
+;retenido temporalmente en la pregunta) y se elimina al usuario en la sesión activa del stack.
+;la función actualiza un stack agregando una respuesta y cambiando todo lo que ello conlleva
+;(para ello usa las funciones 'actualizarUsuariosReputacion' y 'actualizarPreguntasRecompensa').
 
-;Rec: una lista de preguntas, con la pregunta actualizada (agregada la recompensa).
-
-(define reward(lambda(sta)
-  (lambda(idPreg)
-    (lambda(montoRecompensa)
-     (if (puedeOfrecerRecompensa? (getUsuario (getNomUser (getActivo sta))(getUsuarios sta)) montoRecompensa)
-        (stack (actualizarUsuariosReputacion (getUsuarios sta) (getNomUser (getActivo sta)) (cons - montoRecompensa))
-               emptyUser
-               (actualizarPreguntasRecompensa (getPreguntas sta) idPreg (recompensa (getNomUser (getActivo sta)) montoRecompensa))
-               (getCorrPreg sta)(getCorrRes sta))
-        sta
-        )))))
+(define reward(lambda(stack1)
+                (lambda(idPreg)
+                  (lambda(montoRecompensa)
+                    ;si existe la pregunta en la lista de preguntas, si el monto de recompensa es real (mayor que 0), el stack de entrada es un stack...
+                    (if (and (existePregunta? idPreg (getPreguntas stack1))(> montoRecompensa 0)(stack? stack1))
+                        ;y si el usuario activo puede ofrecer esa recompensa...
+                        (if (puedeOfrecerRecompensa? (getActivo stack1) montoRecompensa)
+                            ;se actualiza el stack y se realizan los cambios correspondientes.
+                            (stack (actualizarUsuariosReputacion (getUsuarios stack1) (getNomUser (getActivo stack1)) (cons - montoRecompensa))
+                                   emptyUser
+                                   (actualizarPreguntasRecompensa (getPreguntas stack1) idPreg (recompensa (getNomUser (getActivo stack1)) montoRecompensa))
+                                   (getCorrPreg stack1)(getCorrRes stack1))
+                            stack1) ;sino se retorna el stack de entrada.
+                        stack1) ;si los datos eran incorrectos se retorna el stack de entrada.
+                    )
+                  )
+                )
+  )
 
 ;Ejemplo:
-l
-l
-(((login stack1 "Ana" "A1234" reward) 1) 15)
+;(((login stack1 "Ana" "A1234" reward) 1) 15)
 
-;Funcion7:answer; responder una pregunta.------------------------------------------------------------------
-
-
-;Dom: un TDApregunta(lista), respuestas.
-;Rec: un TDApregunta actualizado, con la respuesta agregada a su TDA respuestas(lista).
-(define agregarRespuestaApreg(lambda(ask answer)
-                          (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
-                              (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (getVcontraPreg ask)
-                               (getRecompensa ask) (getReportesPreg ask)(agregarElemento (getRespuestas ask) answer))))
-
-;Dom: TDApreguntas (lista de preguntas), int identificador de pregunta, TDApregunta nueva pregunta.
-;Rec: un TDApreguntas actualizado, con la respuesta a la pregunta(id) agregada.
-(define actualizarPreguntasNewAns(lambda(listaPreg idPreg nuevPreg)
-                            (actualizar idPreg getIdPreg agregarRespuestaApreg nuevPreg listaPreg)))
-
-
-;ejemplo:
-;(actualizarPreguntasNewAns
-
-(define answer(lambda(sta)
+;Función 7: answer.
+;Dom: un stack.
+;Rec:
+;Retorna una función currificada que opera sobre los argumentos date(fecha), entero (idPreg) y un string(contenido respuesta)+ una lista de etiquetas.
+;El retorno final de la función es una versión actualizada del stack, donde se agrega una respuesta a una pregunta, se elimina al usuario en la sesión
+;activa del stack y se aumenta el correlativo de respuestas.
+;La función agrega la respuesta gracias a la función 'actualizarPregNewAns' ubicada en TDApreguntas.rkt.
+(define answer(lambda(stack1)
                 (lambda(fecha)
                   (lambda(idPreg)
-                     (lambda(contenidoRes etiquetas)
-                  (stack (getUsuarios sta)
-                          emptyUser
-                          (actualizarPreguntasNewAns (getPreguntas sta) idPreg
-                             (respuesta (getCorrRes sta) (getNomUser (getActivo sta)) fecha contenidoRes etiquetas "" 0 0 0))
-                          (getCorrPreg sta)
-                          (+ 1 (getCorrRes sta))))))))
+                    (lambda(contenidoRes etiquetas)
+                      ;si los datos ingresados son correctos...
+                      (if(and (integer? idPreg)(existePregunta? idPreg (getPreguntas stack1))(stack? stack1)(date? fecha)(string? contenidoRes)(list? etiquetas))
+                         ;se actualiza el stack agregando la respuesta, eliminando al usuario de activo y aumentando el correlativo de preguntas.
+                         (stack (getUsuarios stack1)
+                                emptyUser
+                                (actualizarPreguntasNewAns (getPreguntas stack1) idPreg
+                                                           (respuesta (getCorrRes stack1) (getNomUser (getActivo stack1)) fecha contenidoRes etiquetas "" 0 0 0))
+                                (getCorrPreg stack1)
+                                (+ 1 (getCorrRes stack1)))
+                         stack1);sino se retorna el stack tal cual.
+                      )
+                    )
+                  )
+                )
+  )
                   
 ;Ejemplo:
-l
-((((login stack1 "Ana" "A1234" answer)(date 12 12 2020)) 1) "Nose" (list "jahsjoiuu" "123"))
+;((((login stack1 "Ana" "A1234" answer)(date 12 12 2020)) 1) "Nose" (list "jahsjoiuu" "123"))
 
-;Función 8: accept, permite aceptar una pregunta.
-
-(define getQuestion(lambda(id)
-                     (lambda(listaPreg)
-                     (get id getIdPreg listaPreg))))
-
-
-(define esResDePreg(lambda(listaRespuestas idRes)
-                    (if (null? listaRespuestas)
-                         false
-                        (if (eqv? idRes (getIdRes (primerElemento listaRespuestas)))
-                            true
-                            (esResDePreg (siguientesElementos listaRespuestas) idRes)
-                            )
-                        )
-                     )
-  )
-;respuesta -->accep si, pregunta recom 0.
-;Rec: una respuesta actualizada
-(define modificarResAccept(lambda(res aceptacion)
-                        (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) aceptacion (getVfavorRes res)
-                                   (getVcontraRes res) (getReportesRes res))))
-;Dom: lista de respuestas e identificador res
-;Rec: Una lista de respuestas actualizada
-(define actualizarRespuestasAccept(lambda(listaRes idRes)
-                             (actualizar idRes getIdRes modificarResAccept "Aceptada"  listaRes)))
-
-;Rec: una lista una pregunta y una lista de respuestas actualizada.
-;Dom: un TDA pregunta actualizada, con sus respuestas actualizadas (respuesta aceptada) y sin recompensa.
-(define modificarPregAccept(lambda(ask respuestasActualizada)
-                          (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
-                              (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (getVcontraPreg ask)
-                               emptyReward (getReportesPreg ask) respuestasActualizada)))
-
-;Dom: un TDA preguntas, 2 int: un identificadore de pregunta y uno de respuesta.
-;Rec:TDA preguntas actualizado, con la pregunta actualizada(idPreg).
-(define actualizarPreguntasAccept(lambda(listaPreg idPreg idRes)
-                                  (if (null? listaPreg)
-                                      emptylist
-                                      (if(eqv? idPreg (getIdPreg (primerElemento listaPreg)))
-                                         (cons
-                                          (modificarPregAccept (primerElemento listaPreg) (actualizarRespuestasAccept(getRespuestas(primerElemento listaPreg)) idRes))
-                                          (siguientesElementos listaPreg))
-                                         (cons (primerElemento listaPreg) (actualizarPreguntasAccept (siguientesElementos listaPreg) idPreg idRes))
-                                         ))))
-
-                                 
-                                                
-;El autor de la pregunta, quien es el unico que puede aceptar respuestas a sus preguntas gana +2 de reputacion
-;El autor de la respuesta que fue aceptada gana +15 por responder y +monto de recompensa en la pregunta.
-(define actualizarUsuarios2Reput(lambda(listaUsuarios persona1 persona2 operacion1 operacion2)
-                                  (if (null? listaUsuarios)
-                                      emptyUser
-                                      (if(eqv? persona2 (getNomUser (primerElemento listaUsuarios)))
-                                         (cons (modificarReputacion (primerElemento listaUsuarios) operacion2)
-                                               (actualizarUsuarios2Reput (siguientesElementos listaUsuarios)persona1 persona2 operacion1 operacion2))
-                                         (if(eqv? persona1 (getNomUser (primerElemento listaUsuarios)))
-                                            (cons (modificarReputacion (primerElemento listaUsuarios)operacion1)
-                                                  (actualizarUsuarios2Reput (siguientesElementos listaUsuarios) persona1 persona2 operacion1 operacion2))
-                                            (cons (primerElemento listaUsuarios)
-                                                  (actualizarUsuarios2Reput (siguientesElementos listaUsuarios) persona1 persona2 operacion1 operacion2)))))))
-;Ejemplo:
-;(actualizarUsuariosAccept usuarios1 "Ana" "Maria" 10)
-
-
-(define getAnswer(lambda(idRes)
-                      (lambda(idPreg)
-                        (lambda(listaPreg)
-                        (get idRes getIdRes (getRespuestas ((getQuestion idPreg) listaPreg)))))))
-
-;Ejemplo:
-l
-;(((getAnswer 1)0)preguntas1)
-                        
-                           
-    
-(define accept(lambda(sta)
+;Función 8: accept.
+;Dom: un stack.
+;Rec:
+;retorna una función currificada que opera sobre los argumentos entero(id pregunta), entero(id de respuesta).
+;El retorno final de la función es una versión actualizada del stack, donde se acepta una respuesta de una pregunta, se elimina al usuario en la sesión
+;activa y se realizan todos los cambios que conlleva aceptar la respuesta. Estos son, se elimina la recompensa en la pregunta si es que exitia,
+;el autor de la respuesta gana +15 puntos de reputación además del total del monto de recompensa y el autor de la pregunta gana 2 puntos de reputación.
+(define accept(lambda(stack1)
                 (lambda(idPreg)
                   (lambda(idRes)
-                  (if(and (esResDePreg (getRespuestas ((getQuestion idPreg)(getPreguntas sta))) idRes) ; si la rspuesta corresponde a la pregunta
-                          (eqv? (getNomUser (getActivo sta)) (getAutorPreg ((getQuestion idPreg )(getPreguntas sta))))) ;y es pregunta del usuario activo, puede acceptar
-                     (stack (actualizarUsuarios2Reput (getUsuarios sta)(getAutorRes (((getAnswer idRes)idPreg)(getPreguntas sta)))(getNomUser (getActivo sta))
-                                                      (cons + (+ 15 (getValorRecompensa(getRecompensa((getQuestion idPreg)(getPreguntas sta))))))
-                                                      (cons + 2))
-                            emptyUser
-                            (actualizarPreguntasAccept (getPreguntas sta) idPreg idRes)
-                            (getCorrPreg sta)
-                            (getCorrRes sta))
-                     sta)))))
+                    ;si los datos ingresados son correctos...
+                    (if(and (stack? stack1)(integer? idPreg)(integer? idRes))
+                       ;y si la pregunta existe en preguntas del stack...
+                       (if(and (existePregunta? idPreg (getPreguntas stack1))
+                               ;, la respuesta existe en las respuestas de la pregunta...
+                               (existeRespuesta? (getRespuestas ((getQuestion idPreg)(getPreguntas stack1))) idRes)
+                               ;, el usuario activo es el autor de la pregunta...
+                               (eqv? (getNomUser (getActivo stack1)) (getAutorPreg ((getQuestion idPreg )(getPreguntas stack1))))
+                               ;y el usuario activo no es el autor de la respuesta...
+                               (not(eqv? (getNomUser (getActivo stack1)) (getAutorRes (((getAnswer idRes)idPreg)(getPreguntas stack1))))))
+                          ;entonces se puede aceptar la respuesta y se puede actualizar el stack
+                          (stack (actualizarUsuarios2Reput (getUsuarios stack1)(getAutorRes (((getAnswer idRes)idPreg)(getPreguntas stack1)))(getNomUser (getActivo stack1))
+                                                           ;el autor de la respuesta gana 15 + recompensa.
+                                                           (cons + (+ 15 (getValorRecompensa(getRecompensa((getQuestion idPreg)(getPreguntas stack1))))))
+                                                           ;el autor de la pregunta gana 2.
+                                                           (cons + 2))
+                                 emptyUser ;se elimina el usuario de sesión activa.
+                                 (actualizarPreguntasAccept (getPreguntas stack1) idPreg idRes) ;se actualiza el estado de la respuesta "Aceptada".
+                                 (getCorrPreg stack1)
+                                 (getCorrRes stack1))
+                          stack1); sino cumplio las condiciones se retorna el stack tal cual.
+                       stack1); si los datos de entrada eran incorrectos se retorna el stack tal cual.
+                    )
+                  )
+                )
+  )
 
 
 ;Ejemplo:
-l
-stack1
-l
-(((login stack1 "Maria" "Maria1999" accept)1)0)
+;(((login stack1 "Maria" "Maria1999" accept)1)0)
 
-;Función 10: vote: permite votar a favor o encontra de una pregunta o una respuesta.
-;Actualizar usuarios.
-(define actualizarUsuariosReputacionVotPreg(lambda(listaUsuarios nombre booleano)
-                                             (if booleano
-                                                 (actualizarUsuariosReputacion listaUsuarios nombre (cons + 10))
-                                                 (actualizarUsuariosReputacion listaUsuarios nombre (cons - 2)))))
-
-(define actualizarUsuariosReputacionVotRes(lambda(listaUsuarios autorRes votador booleano)
-                                            (if booleano
-                                                (actualizarUsuariosReputacion listaUsuarios autorRes (cons + 10))
-                                                (actualizarUsuarios2Reput listaUsuarios votador autorRes (cons - 1) (cons - 2)))))
-                                                                                     
-
-;Actualizar una pregunta cuando se vota positivo o negativo, se suma un voto a donde corresponda
-(define modificarPregVot(lambda(ask booleano)
-                          (if booleano
-                              (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
-                                        (getEstadoPreg ask) (getVisualizacionesPreg ask) (+ 1 (getVfavorPreg ask)) (getVcontraPreg ask)
-                                        (getRecompensa ask) (getReportesPreg ask) (getRespuestas ask))
-                              (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
-                                        (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (+ 1 (getVcontraPreg ask))
-                                        (getRecompensa ask) (getReportesPreg ask) (getRespuestas ask)))))
-
-(define actualizarPreguntasVot(lambda(listaPreg idPreg booleano)
-                                (actualizar idPreg getIdPreg modificarPregVot booleano listaPreg)))
-                                
-                   
+;Función 10: vote.
+                 
 ;Actualizar un stack cuando el voto esta destinado a una pregunta.
 (define actualizarStackVotPreg(lambda(sta booleano funcion idPreg)
                                 (stack (actualizarUsuariosReputacionVotPreg (getUsuarios sta) (getAutorPreg ((funcion idPreg)(getPreguntas sta))) booleano)
@@ -280,27 +204,6 @@ l
                                        (actualizarPreguntasVot (getPreguntas sta) idPreg booleano)
                                        (getCorrPreg sta)(getCorrRes sta))))
 
-;Actualizar una respuesta cuando recibe un voto, positivo o negativo.
-(define modificarResVot(lambda(res booleano)
-                         (if booleano
-                             (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
-                                        (+ 1 (getVfavorRes res)) (getVcontraRes res) (getReportesRes res))
-                             (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
-                                        (getVfavorRes res) (+ 1 (getVcontraRes res)) (getReportesRes res)))))
-
-  
-;Dom: una lista de respuestas el id de la respuesta y un booleano.
-;Rec: una lista de preguntas actualizada con el voto realizado.
-(define actualizarResVot(lambda (listaRes idRes booleano)
-                          (actualizar idRes getIdRes modificarResVot booleano listaRes)))
-
-  
-;Rec: una lista una pregunta y una lista de respuestas actualizada.
-;Dom: un TDA pregunta actualizada, con sus respuestas actualizadas (con el voto agregado)
-(define modificarPregVotRes(lambda(ask respuestasActualizada)
-                             (pregunta (getIdPreg ask) (getAutorPreg ask) (getFechaPreg ask) (getContenidoPreg ask) (getEtiquetasPreg ask)
-                                       (getEstadoPreg ask) (getVisualizacionesPreg ask) (getVfavorPreg ask) (getVcontraPreg ask)
-                                       (getRecompensa ask) (getReportesPreg ask) respuestasActualizada)))
   
 
 
@@ -342,14 +245,6 @@ l
 
 
 ;Función 9: mostrar el stack como un string ordenado.
-;(display (list "los usuarios del stack son:\n" (getUsuarios stack1)))
-;Función que muestra los datos de un usuario.
-(define mostrarElementosList(lambda(lista)
-                              (if (null? lista)
-                                  emptyList
-                                  (if (null? (siguientesElementos lista))
-                                      (cons (primerElemento lista)(cons "." null))
-                                      (cons (primerElemento lista)(cons "," (mostrarElementosList (siguientesElementos lista))))))))
 
                                  
 (define mostrarUsuario(lambda(user)
