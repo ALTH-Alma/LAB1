@@ -1,6 +1,7 @@
 #lang racket
 (require "TDArespuesta.rkt")
 (require "FuncionesGenerales.rkt")
+
 (provide respuestas?)
 (provide emptyAnswers)
 (provide actualizarRespuestasAccept)
@@ -69,7 +70,10 @@
                            (mostrarElementos listaRespuestas mostrarRespuesta)))
 
 
-;Ejemplo:
+
+
+;EJEMPLOS NECESARIOS PARA EJEMPLOS DE FUNCIONES MAIN:
+
 (define respuestas1(respuestas a1 a2))
 (define respuestas2(respuestas a3))
 (define respuestas3 emptyAnswer)

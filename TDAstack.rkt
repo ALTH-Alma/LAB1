@@ -1,11 +1,11 @@
 #lang racket
-
 (require "FuncionesGenerales.rkt")
 (require "TDAusuario.rkt")
 (require "TDAusuarios.rkt")
 (require "TDApregunta.rkt")
 (require "TDApreguntas.rkt")
 (require "TDArespuesta.rkt")
+
 (provide stack)
 (provide stack?)
 (provide getUsuarios)
@@ -18,6 +18,7 @@
 (provide actualizarStackVotPreg)
 (provide actualizarStackVotRes)
 (provide mostrarStack)
+(provide stackErrorDatos)
 
 
 ;TDA stack.
@@ -77,6 +78,8 @@
                     )
                  )
   )
+
+;FUNCIONES EXTRAS:
 
 ;Dom: un stack y un string(nombre).
 ;Rec: un stack actualizado.
@@ -138,6 +141,11 @@
                                )
   )
 
+;Dom: un stack;
+;Rec: stack tal cual, pero sin usuario activo.
+;Elimina a un usuario activo.
+(define stackErrorDatos(lambda(stack1)
+                             (stack (getUsuarios stack1) emptyUser (getPreguntas stack1) (getCorrPreg stack1) (getCorrRes stack1))))
 
 ;Dom: un stack.
 ;Rec: un string.
@@ -152,7 +160,7 @@
 
 
 
-;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+;EJEMPLOS NECESARIOS PARA EJEMPLOS DE FUNCIONES MAIN:
 
 (define stackPrueba(stack usuarios1 emptyUser preguntas1 3 3))
 (provide stackPrueba)

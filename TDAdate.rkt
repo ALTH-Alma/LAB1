@@ -1,4 +1,5 @@
 #lang racket
+
 (provide date)
 (provide date?)
 (provide date->string)
@@ -41,6 +42,8 @@
                (if(and(list? fecha)(integer? (getDia fecha))(<= (getDia fecha) 31)(integer? (getMes fecha))(<= (getMes fecha) 12)(integer? (getAño fecha)))
                   true
                   false)))
+
+;FUNCIÖN EXTRA:
 
 ;Dom: un date.
 ;Rec: un string.

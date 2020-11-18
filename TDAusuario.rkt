@@ -1,6 +1,6 @@
 #lang racket
-
 (require "FuncionesGenerales.rkt")
+
 (provide usuario)
 (provide usuario?)
 (provide emptyUser)
@@ -62,6 +62,8 @@
                   )
 )
 
+;FUNCIONES EXTRAS:
+
 ;Dom: un usuario y un entero.
 ;Rec: un booleano.
 ;La función revisa si un usuario puede ofrecer una recompensa,en base a la reputación del usuario y al
@@ -102,7 +104,7 @@
                         )
   )
 
-;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+;EJEMPLOS NECESARIOS PARA EJEMPLOS DE FUNCIONES MAIN:
 
 (provide u1)
 (provide u2)

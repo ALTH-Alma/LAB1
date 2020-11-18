@@ -1,10 +1,10 @@
 #lang racket
-
 (require "FuncionesGenerales.rkt")
 (require "TDArespuesta.rkt")
 (require "TDArespuestas.rkt")
 (require "TDApregunta.rkt")
 (require "TDArecompensa.rkt")
+
 (provide preguntas?)
 (provide actualizarPreguntasRecompensa)
 (provide actualizarPreguntasNewAns)
@@ -17,6 +17,8 @@
 (provide existeRespuestaEnPreg?)
 (provide mostrarPreguntas)
 (provide mostrarPregUsuario)
+
+
 ;TDA preguntas.
 ;Representación: una lista de pregunta's (pregunta1, pregunta2,....,..,., preguntaN).
 
@@ -44,6 +46,8 @@
                     (es? pregunta? lista)
                      )
   )
+
+;FUNCIONES EXTRAS:
 
 ;Dom: preguntas, un entero(identificador), y una recompensa.
 ;Rec: pregntas actualizadas.
@@ -97,7 +101,7 @@
 ;Usa la función getAnswer para obtener la respuesta, y si esta retorna un null significa que la respuesta
 ;no existia en la pregunta.
 (define existeRespuestaEnPreg?(lambda(idRes idPreg listaPreguntas)
-                     (if (null? (((getAnswer idRes)idPreg))listaPreguntas)
+                     (if (null? (((getAnswer idRes)idPreg)listaPreguntas))
                          false
                          true)))
 
@@ -195,7 +199,8 @@
   )
 
 
-;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+;EJEMPLOS NECESARIOS PARA EJEMPLOS DE FUNCIONES MAIN:
+
 (provide preguntas1)
 (define preguntas1(preguntas p1 p2 p3))
 ;preguntas1

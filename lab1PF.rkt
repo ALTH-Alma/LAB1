@@ -38,7 +38,7 @@
 ;Rec:
 ;Si se autentifica el usuario: función currificada para la operacion de parametro de entrada,
 ;parcialmente evaluada con el stack actualizado(usuario autentificado y registrado en sesión activa).
-;Sino: la operación.
+;Sino: la función currifcada evaluada en el stack sin modificar.
 ;La función permite iniciar sesión a un usuario registrado y autentificado, además, permite la ejecución
 ;de comandos concretos dentro del stack (operaciones).
 ;Utiliza una función de orden superior y recursiva de cola llamada "get" utilizada en la función "getUsuario"
@@ -48,9 +48,9 @@
                (if (and (stack? stack1)(string? nombre)(string? contraseña)) ;si los datos ingresados son correctos...
                    (if(autentificar nombre contraseña (getUsuarios stack1)) ;y si se encuntra al usuario y su contraseña es correcta..
                       (operacion (agregarAactivo stack1 nombre)) ;se evalua la operación currificada con el stack actualizado(gracias a la función agregarAactivo). 
-                     (operacion stack1) ;sino se retorna la operación.
+                     (operacion stack1) ;sino se retorna la operación con el stack sin actualizar.
                       )
-                   (operacion stack1) ;si los datos ingresados son incorrectos se retorna la operación.
+                   (operacion stack1) ;si los datos ingresados son incorrectos se retorna la operación con el stack sin actualizar.
                    )
                )
   )
@@ -71,9 +71,10 @@
 (define ask(lambda(stack1)
              (lambda(fecha)
                (lambda(contenido etiquetas)
-                 (if (and (stack? stack1)(date? fecha)(contenidoPreg? contenido)(list? etiquetas)(not(null? (getActivo stack1)))) ;si los datos ingresados son correctos.... actualizo stack.
+                 (if (and (stack? stack1)(date? fecha)(contenidoPreg? contenido)(list? etiquetas)(not(null? (getActivo stack1)))) ;si los datos ingresados son correctos....
+                     ;actualizo stack.
                      (actualizarStackPreg stack1 (pregunta (getCorrPreg stack1)(getNomUser (getActivo stack1)) fecha contenido etiquetas "Abierta" 0 0 0 emptyReward 0 emptyAnswers))
-                     stack1 ;sino entrego un mensaje.
+                     (stackErrorDatos stack1) ;sino entrego se entrega el stack sin modificación.
                      )
                  )
                )
@@ -104,8 +105,8 @@
                                    emptyUser
                                    (actualizarPreguntasRecompensa (getPreguntas stack1) idPreg (recompensa (getNomUser (getActivo stack1)) montoRecompensa))
                                    (getCorrPreg stack1)(getCorrRes stack1))
-                            stack1) ;sino se retorna el stack de entrada.
-                        stack1) ;si los datos eran incorrectos se retorna el stack de entrada.
+                            (stackErrorDatos stack1)) ;sino se retorna el stack de entrada.
+                        (stackErrorDatos stack1)) ;si los datos eran incorrectos se retorna el stack de entrada.
                     )
                   )
                 )
@@ -134,7 +135,7 @@
                                                            (respuesta (getCorrRes stack1) (getNomUser (getActivo stack1)) fecha contenidoRes etiquetas "" 0 0 0))
                                 (getCorrPreg stack1)
                                 (+ 1 (getCorrRes stack1)))
-                         stack1);sino se retorna el stack tal cual.
+                         (stackErrorDatos stack1));sino se retorna el stack tal cual.
                       )
                     )
                   )
@@ -174,8 +175,8 @@
                                  (actualizarPreguntasAccept (getPreguntas stack1) idPreg idRes) ;se actualiza el estado de la respuesta "Aceptada".
                                  (getCorrPreg stack1)
                                  (getCorrRes stack1))
-                          stack1); sino cumplio las condiciones se retorna el stack tal cual.
-                       stack1); si los datos de entrada eran incorrectos se retorna el stack tal cual.
+                         (stackErrorDatos stack1)); sino cumplio las condiciones se retorna el stack tal cual.
+                       (stackErrorDatos stack1)); si los datos de entrada eran incorrectos se retorna el stack tal cual.
                     )
                   )
                 )
@@ -221,20 +222,27 @@
                     (if(and(stack? stack1)(integer? idPreg)(boolean? booleano)(not(null? (getActivo stack1)))) ;si los datos ingresados son correctos...
                        (if (existePregunta? idPreg (getPreguntas stack1)) ; ,si la pregunta con ese id existe en las preguntas...
                            (if (eqv? getQuestion funcion) ;y si se ingreso un getQuestion...
-                               ;se actualiza el stack con la función 'actualizarStackVotPreg'.
-                               (actualizarStackVotPreg stack1 booleano funcion idPreg)
-                               ;si el usuario no ingreso un getQuestion, se asume que ingreso un getAnswer..
-                               (if (not(null? ((funcion idPreg)(getPreguntas stack1)))) ; y si la respuesta a la pregunta existe.
-                                   ;se actualiza el stack con la función 'actualizarStackVotRes'.s
-                                   (actualizarStackVotRes stack1 booleano funcion idPreg)
-                                   stack1)) ;sino existia la respuesta 
-                           stack1); sino existe la pregunta en el stack, se retorna el stack tal cual.s
-                       stack1);si los datos ingresados era incorrectos se retorna el stack tal cual.
+                               ; si el votador no es autor de la pregunta...
+                               (if (not (eqv? (getNomUser (getActivo stack1)) (getAutorPreg ((funcion idPreg )(getPreguntas stack1)))))
+                                   ;se actualiza el stack con la función 'actualizarStackVotPreg'.
+                                   (actualizarStackVotPreg stack1 booleano funcion idPreg)
+                                   (stackErrorDatos stack1)) ;si el votador es el autor no se realiza el voto.
+                               ;si el usuario no ingreso un getQuestion, se asume que ingreso un getAnswer...
+                               (if (not(null? ((funcion idPreg)(getPreguntas stack1)))) ; y si la respuesta a la pregunta existe...
+                                   ;y el autor de la respuesta no es el votador...
+                                   (if (not (eqv? (getNomUser (getActivo stack1)) (getAutorRes ((funcion idPreg )(getPreguntas stack1)))))
+                                       ;se actualiza el stack con la función 'actualizarStackVotRes'.
+                                       (actualizarStackVotRes stack1 booleano funcion idPreg)
+                                       (stackErrorDatos stack1)); ;si el votador es el autor no se realiza el voto.
+                                   (stackErrorDatos stack1))); si no existe la respuesta en el stack, se retorna el stack tal cual.
+                           (stackErrorDatos stack1)); si no existe la pregunta en el stack, se retorna el stack tal cual.
+                       (stackErrorDatos stack1));si los datos ingresados eran incorrectos se retorna el stack tal cual.
                     )
                   )
                 )
               )
   )
+  
 
 
 
@@ -248,6 +256,7 @@ l
 (register stackPrueba "Maria" "MLopez");2)no se registra, nombre existente.
 l
 (register stackPrueba "pedro" "P1997");3)se registra, usuario valido (existe Pedro pero con mayuscula).
+
 
 ;3 LOGIN:
 l
@@ -269,36 +278,72 @@ l
 ;3)no realiza cambios, datos de entrada incorrectos.
 (((login stackPrueba "Ana" "A1234" ask)(date 30 10 22))(contenidoPreg "FUNCIONA?" "quiero saber si esta operacion funciona correctamente") "prueba")
 
+
 ;6 REWARD:
 l
 ;1) ofrece la recompensa, pues se inicia bien sesión, existe la pregunta, Ana tiene suficiente reputación y la pregunta no tenia recompensa previa.
 (((login stackPrueba "Ana" "A1234" reward) 1) 15)
 l
-;2)no se realiza el cambio en el stack, pues la respuesta ya tenia recompensa ofrecida.
+;2)no se realiza el cambio en el stack, pues la pregunta ya tenia recompensa ofrecida.
 (((login stackPrueba "Ana" "A1234" reward) 0) 15)
 l
-;3)no se realiza el cambio en el stack, pues la respuesta no existe.
-(((login stackPrueba "Ana" "A1234" reward) 5) 15)
+;3)no se realiza el cambio en el stack, pues la pregunta no existe y el monto supera la reputación de Ana.
+(((login stackPrueba "Ana" "A1234" reward) 5) 100)
+
 
 ;7 ANSWER:
-;((((login stackPrueba "Ana" "A123" answer)(date 12 12 2020)) 1) "Nose" (list "jahsjoiuu" "123"))
-
-;Ejemplo:
-;(((login stackPrueba "Maria" "Maria199" accept)1)0)
-
-
-
-
-;Ejemplo:
-
 l
-;stack1
+;1)se agrega una respuesta, pues se inicia sesión correctamente, los datos de entrada son correctos y existe la pregunta.
+((((login stackPrueba "Pedro" "P340" answer)(date 12 12 2020)) 1) "Puedes usar QPalette" (list "imagen" "gráfica"))
 l
-;((((login stackPrueba "Maria" "Maria1999" vote)(getAnswer 1))0)false)
+;2)no se agrega la respuesta, pues la pregunta que se desea contestar no existe.
+((((login stackPrueba "Pedro" "P340" answer)(date 12 12 2020)) 5) "Puedes usar QPalette" (list "imagen" "gráfica"))
+l
+;3)no se agrega la respuesta, pues no se inicia sesión correctamente y los datos de entragados no son correctos
+((((login stackPrueba "pedrito" "P34" answer)"12/12/2020") 1) "Puedes usar QPalette" (list "imagen" "gráfica"))
 
 
+;8 ACCEPT:
+l
+;1)se acepta la pregunta, pues el usuario inicia sesión exitosamente, los datos de entrada son correctos, existe la pregunta,
+;existe la respuesta y el usuario activo es autor de la pregunta y no es autor de la respuesta.
+(((login stackPrueba "Maria" "Maria1999" accept)0)1)
+l
+;2)no se acepta la pregunta pues la respuesta no corresponde a la pregunta.
+(((login stackPrueba "Maria" "Maria1999" accept)0)2)
+l
+;3)no se acepta la pregunta pues el usuario activo no es autor de la pregunta.
+(((login stackPrueba "Maria" "Maria1999" accept)1)2)
 
-                                 
+
+;9 STACK->STRING:
+l
+;1)la función genera el string de todo el stack.
+(stack->string stackPrueba)
+;Así se ve con display.
+(display (stack->string stackPrueba))
+l
+;2)la función genera el string de los elementos de usuario activo y sus preguntas.
+(login stackPrueba "Maria" "Maria1999" stack->string)
+;Así se ve con display.
+(display (login stackPrueba "Maria" "Maria1999" stack->string))
+l
+;2)la función genera el string de los elementos de usuario activo y sus preguntas.
+(login stackPrueba "Ana" "A1234" stack->string)
+;Así se ve con display.
+(display (login stackPrueba "Ana" "A1234" stack->string))
+
+
+;VOTE:
+l
+;1)se realiza el voto, pues todas las entradas son correctas, existe la pregunta y la respuesta, el usuario inicia sesión exitosamente y no es el autor de la respuesta.
+((((login stackPrueba "Maria" "Maria1999" vote)(getAnswer 1))0)false)
+l
+;2)se realiza el voto, pues todas las entradas son correctas, existe la pregunta, el usuario inicia sesión exitosamente y no es autor de la pregunta.
+((((login stackPrueba "Maria" "Maria1999" vote)getQuestion)1)true)
+l
+;3)no se realiza el voto, pues no existe la respuesta.
+((((login stackPrueba "Maria" "Maria1999" vote)(getAnswer 9))1)false)
 
 
 

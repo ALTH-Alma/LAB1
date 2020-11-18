@@ -5,6 +5,7 @@
 (provide getOfertor)
 (provide getValorRecompensa)
 (provide recompensa?)
+(provide recompensa->string)
 
 
 ;TDA recompensa.
@@ -50,3 +51,17 @@
                          )
                      )
   )
+
+
+;FUNCIÖN EXTRA:
+
+;Dom: una recompensa.
+;Rec. un string.
+;la función transforma una recompensa en string.
+(define recompensa->string(lambda(recompensa)
+                            (if (eqv? recompensa emptyReward)
+                                "No posee recompensa aun."
+                                (string-append (number->string (getValorRecompensa recompensa))" puntos - Realizada por "(getOfertor recompensa)". "))))
+                                
+
+

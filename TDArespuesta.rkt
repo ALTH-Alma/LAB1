@@ -131,13 +131,13 @@
 
 
 
-;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+;EJEMPLOS NECESARIOS PARA EJEMPLOS DE FUNCIONES MAIN:
 
 (define a1(respuesta 0 "Pedro" (date 2 3 2020) "Aumenta la complejidad y puede generar resultados impredecibles" (list "Variables globales") "" 10 2 0))
 (define a2(respuesta 1 "Juan" (date 1 3 2020) "El problema de las variables globales es que crea dependencias ocultas. Cuando se trata
  de aplicaciones grandes, ni tú mismo sabes/recuerdas/tienes claro los objetos que tienes y sus relaciones." (list "Malas practicas") "" 2 9 1))
 (define a3(respuesta 2 "Maria" (date 13 11 2020) "Usando Qt Style Sheet" emptyList "" 6 3 0))
-;(define a4(respuesta 3 "Ana" (date 2 3 2020) "365 días" emptyList "Aceptada" 12 2 0))
+
 (provide a1)
 (provide a2)
 (provide a3)

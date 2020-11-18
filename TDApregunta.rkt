@@ -187,7 +187,7 @@
                                 "\nVisualizaciones: "(number->string (getVisualizacionesPreg preg))
                                 "\nVotos a favor: "(number->string (getVfavorPreg preg))
                                 "\nVotos en contra: "(number->string (getVcontraPreg preg))
-                                "\nRecompensa: "(number->string (getValorRecompensa (getRecompensa preg)))" puntos - Realizada por"(getOfertor (getRecompensa preg))". "
+                                "\nRecompensa: "(recompensa->string (getRecompensa preg))
                                 "\nReportes: "(number->string (getReportesPreg preg))
                                 "\n\nRespuestas:\n"
                                 (mostrarRespuestas (getRespuestas preg))
@@ -197,7 +197,7 @@
 
 
 
-;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+;EJEMPLOS NECESARIOS PARA EJEMPLOS DE FUNCIONES MAIN:
 
 (provide p1)
 (provide p2)
@@ -206,6 +206,6 @@
                     emptyList "Abierta" 10 3 2 (recompensa "Maria" 10) 1 respuestas1))
 (define p2(pregunta 1 "Ana" (date 29 10 2020) (cons "¿Cómo poner una imagen de fondo en?" "Me gustaría saber ¿Cómo pongo una imagen de fondo a la ventana creada
  con PyQT5? Muchos me dicen que use Designer, pero estoy evitando usarlo. ¿Conocen alguna manera?")(list "python""interfaz-gráfica""imagen") "Abierta" 20 5 2 emptyReward 0 respuestas2))
-(define p3(pregunta 2  "Juan" (date 30 2 2020) (cons "¿Cómo puedo subir un archivo de ms Project a PHP para poder leerlo y mostrarlo en pantalla?"
+(define p3(pregunta 2  "Maria" (date 30 2 2020) (cons "¿Cómo puedo subir un archivo de ms Project a PHP para poder leerlo y mostrarlo en pantalla?"
                                                      "NO tengo ni idea de como hacerlo y no tengo nada que mostrar si alguien me puede ayudar se lo agradecería.") emptyList "Abierta" 1 1 0  emptyReward 2 respuestas3))
 
