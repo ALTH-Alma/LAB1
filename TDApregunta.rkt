@@ -17,15 +17,16 @@
 (provide agregarRespuestaApreg)
 (provide modificarPregVot)
 (provide modificarPregVotRes)
+(provide mostrarPregunta)
 
 ;TDA Pregunta.
-;Representación: lista(int id pregunta, string nombre del autor, TDAdate fecha de publicación, TDAcontenidoPreg contenido, lista de etiquetas,
-;string estado pregunta(Abierta/Cerrada), int número de visualizaciones, int votos a favor, int votos en contra, TDArecompensa recompensa,
-;int reportes, TDArespuestas respuestas).
+;Representación: lista(int id pregunta, string nombre del autor, un date fecha de publicación, contenidoPreg contenido, lista de etiquetas,
+;string estado pregunta(Abierta/Cerrada), int número de visualizaciones, int votos a favor, int votos en contra, una recompensa recompensa,
+;int reportes, respuestas respuestas).
 
 ;Capa contructor.
-;Dom: 5 enteros, 2 strings, 1 lista, un TDAcontenidoPreg, un TDAdate, un TDArecompensa y un TDA respuestas.
-;Rec: un TDA pregunta.
+;Dom: 5 enteros, 2 strings, 1 lista, un contenidoPreg, un date, una recompensa y respuestas.
+;Rec: una pregunta.
 (define emptyAsk null)
 (define pregunta(lambda
    (idPregunta autor fechaPublicacion contenido etiquetas estado nVisualizaciones votAfavor votEnContra recompensa reportes respuestas)
@@ -40,7 +41,7 @@
 
 
 ;Capa selector.
-;Dom: todas las funciones de la capa selector tienen por entrada un TDApregunta.
+;Dom: todas las funciones de la capa selector tienen por entrada una pregunta.
 ;______
 
 ;Rec: un entero.
@@ -51,11 +52,11 @@
 ;Entrega el nombre del autor de una pregunta.
 (define getAutorPreg(lambda(pregunta)(car(cdr pregunta))))
 
-;Rec: un TDAdate.
+;Rec: un date.
 ;Entrega la fecha de publicación de una pregunta.
 (define getFechaPreg(lambda(pregunta)(car(cdr(cdr pregunta)))))
 
-;Rec: un TDAcontenidoPreg.
+;Rec: un contenidoPreg.
 ;Entrega contenido de una pregunta (su titulo y cuerpo).
 (define getContenidoPreg(lambda(pregunta)(car(cdr(cdr(cdr pregunta))))))
 
@@ -79,7 +80,7 @@
 ;Entrega el número de votos en contra de una pregunta.
 (define getVcontraPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta)))))))))))
 
-;Rec: un TDArecompensa.
+;Rec: una recompensa.
 ;Entrega la información de una recompensa ofrecida por la pregunta (nombre del autor de la recompensa y el monto de ésta).
 (define getRecompensa(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta))))))))))))
 
@@ -87,7 +88,7 @@
 ;Entrega los reportes de una pregunta.
 (define getReportesPreg(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta)))))))))))))
 
-;Rec: un TDArespuestas.
+;Rec: respuestas.
 ;Entrega las respuestas entregadas a la pregunta.
 (define getRespuestas(lambda(pregunta)(car(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr(cdr pregunta))))))))))))))
 ;_____
@@ -168,13 +169,43 @@
                                        (getEstadoPreg preg) (getVisualizacionesPreg preg) (getVfavorPreg preg) (getVcontraPreg preg)
                                        (getRecompensa preg) (getReportesPreg preg) respuestasActualizadas)))
 
-;Ejemplos:
+
+
+;Dom: una pregunta.
+;Rec: un string.
+;Función que ordena todos los elementos de una pregunta utilizando la función string-append, strings y las funciónes date->string, number->string, mostrarElementosList
+;y mostrarRespuestas para transformar sus elementos en strings. Muestra una pregunta estructurada.
+;Posteriormente se utiliza para mostrar un stack o parte de un stack en un gran string que puede verse ordenado con la función display.
+(define mostrarPregunta(lambda(preg)
+                         (string-append "ID Pregunta: "(number->string (getIdPreg preg))
+                                "\nTitulo pregunta: "(getTituloPreg (getContenidoPreg preg))". "
+                                "\nCuerpo pregunta: "(getCuerpoPreg (getContenidoPreg preg))". "
+                                "\nAutor: "(getAutorPreg preg)". "
+                                "\nFecha publicación: "(date->string (getFechaPreg preg))
+                                "\nEtiquetas: "(mostrarElementosList (getEtiquetasPreg preg))
+                                "\nEstado: "(getEstadoPreg preg)". "
+                                "\nVisualizaciones: "(number->string (getVisualizacionesPreg preg))
+                                "\nVotos a favor: "(number->string (getVfavorPreg preg))
+                                "\nVotos en contra: "(number->string (getVcontraPreg preg))
+                                "\nRecompensa: "(number->string (getValorRecompensa (getRecompensa preg)))" puntos - Realizada por"(getOfertor (getRecompensa preg))". "
+                                "\nReportes: "(number->string (getReportesPreg preg))
+                                "\n\nRespuestas:\n"
+                                (mostrarRespuestas (getRespuestas preg))
+                                "\n")
+                         )
+  )
+
+
+
+;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+
 (provide p1)
 (provide p2)
 (provide p3)
-(define p1(pregunta 0  "Maria" (date 29 2 2020) (cons "Duda" "¿cuantos meses tienen 29 dias?") emptyList "abierta" 10 3 2  (recompensa "Maria" 10) 1 respuestas1))
-(define p2(pregunta 1 "Ana" (date 29 12 2020) (cons "kahdja" "¿jahjajjkaldlsajahn?")(list "lkal") "abierta" 20 5 9 emptyReward 0 emptyAnswer))
-(define p3(pregunta 2  "Maria" (date 30 2 2020) (cons "Año" "¿cuantos dias tiene un año?") emptyList "abierta" 1 1 0  (recompensa "Ana" 5) 3 respuestas2))
-;(getRespuestas p1)
-;(getRespuestas p2)
-;(pregunta? p1)
+(define p1(pregunta 0  "Maria" (date 29 2 2020) (cons "¿Por qué es considerado una mala práctica utilizar variables globales?" "¿Realmente son perjudiciales?")
+                    emptyList "Abierta" 10 3 2 (recompensa "Maria" 10) 1 respuestas1))
+(define p2(pregunta 1 "Ana" (date 29 10 2020) (cons "¿Cómo poner una imagen de fondo en?" "Me gustaría saber ¿Cómo pongo una imagen de fondo a la ventana creada
+ con PyQT5? Muchos me dicen que use Designer, pero estoy evitando usarlo. ¿Conocen alguna manera?")(list "python""interfaz-gráfica""imagen") "Abierta" 20 5 2 emptyReward 0 respuestas2))
+(define p3(pregunta 2  "Juan" (date 30 2 2020) (cons "¿Cómo puedo subir un archivo de ms Project a PHP para poder leerlo y mostrarlo en pantalla?"
+                                                     "NO tengo ni idea de como hacerlo y no tengo nada que mostrar si alguien me puede ayudar se lo agradecería.") emptyList "Abierta" 1 1 0  emptyReward 2 respuestas3))
+

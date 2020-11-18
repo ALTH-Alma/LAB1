@@ -3,7 +3,9 @@
 (require "FuncionesGenerales.rkt")
 (require "TDAusuario.rkt")
 (require "TDAusuarios.rkt")
+(require "TDApregunta.rkt")
 (require "TDApreguntas.rkt")
+(require "TDArespuesta.rkt")
 (provide stack)
 (provide stack?)
 (provide getUsuarios)
@@ -13,16 +15,22 @@
 (provide getCorrRes)
 (provide agregarAactivo)
 (provide actualizarStackPreg)
+(provide actualizarStackVotPreg)
+(provide actualizarStackVotRes)
+(provide mostrarStack)
 
 
 ;TDA stack.
-;Representación: lista(TDAusuarios lista de todos los usuarios del stack, TDAusuario el usuario con sesión iniciada (Activo),
-;TDApreguntas lista de todas las preguntas del stack, int correlativo para asignar IDs a las preguntas que se formulan en el stack,
+;Representación: lista(usuarios -lista de todos los usuarios del stack, usuario -el usuario con sesión iniciada (Activo),
+;preguntas -lista de todas las preguntas del stack, int correlativo para asignar IDs a las preguntas que se formulan en el stack,
 ;int correlativo para asignar IDs a las respuestas que se formulan en el stack).
+;Use esta representación de stack porque al ser listas dentro de listas era una forma facíl de trabajar el paradigma funcional y
+;para implementar funciones recursivas. Además, resultaba conveniente para la estructura de stackoverflow, para organizar los usuarios,
+;las preguntas y sus correspondientes respuestas.
 
 ;Capa constructor.
-;Dom: 2 enteros, un TDAusuario, un TDAusuarios y un TDApreguntas.
-;Rec: un TDAstack.
+;Dom: usuarios, un usuario, preguntas y 2 enteros (correlativo preguntas y resepuestas).
+;Rec: un stack.
 (define emptyStack null)
 (define stack(lambda(perfiles perfilActivo listaPreguntas correlativoPreg correlativoRes)
                (if(and(usuarios? perfiles)(usuario? perfilActivo)(preguntas? listaPreguntas)(integer? correlativoPreg)(integer? correlativoRes))
@@ -33,19 +41,19 @@
   )
 
 ;Capa selector.
-;Dom: todas las funciones de la capa selector reciben como entrada un TDAstack.
+;Dom: todas las funciones de la capa selector reciben como entrada un stack.
 ;____
 
-;Rec: un TDAusuarios.
-;Entrega la lista de TDAs usuario que contiene el stack.
+;Rec: usuarios.
+;Entrega la lista de usuario's que contiene el stack.
 (define getUsuarios(lambda(stack)(car stack)))
 
-;Rec: un TDAusuario.
-;Entrega un TDAusuario de la persona que tiene sesión activa en el stack.
+;Rec: un usuario.
+;Entrega al usuario que tiene sesión activa en el stack.
 (define getActivo(lambda(stack)(car(cdr stack))))
 
-;Rec: un TDApreguntas.
-;Entrega la lista de TDAs pregunta que contiene el stack.
+;Rec: preguntas.
+;Entrega la lista de pregunta's que contiene el stack.
 (define getPreguntas(lambda(stack)(car(cdr(cdr stack)))))
 
 ;Rec: un entero.
@@ -58,7 +66,7 @@
 ;____
 
 ;Capa pertenencia.
-;Dom: un lista, candidato a TDAstack.
+;Dom: un lista, candidato a stack.
 ;Rec: un booleano.
 ;La función entrega un true si el candidato resulato ser stack y false sino.
 (define stack?(lambda(stack1)
@@ -70,41 +78,81 @@
                  )
   )
 
-;Dom: un TDAstack y un string(nombre).
+;Dom: un stack y un string(nombre).
 ;Rec: un stack actualizado.
 ;La función agrega a un usuario a la sesión activa(iniciada) del stack, utiliza la función "getUsuarios" para encontrar al usuario
-;por su nombre en el TDAusuarios del stack y lo agrega al perfil activo.
+;por su nombre en usuarios del stack y lo agrega al perfil activo.
 (define agregarAactivo(lambda(stack1 nombre)
                          (stack (getUsuarios stack1)(getUsuario nombre (getUsuarios stack1))(getPreguntas stack1)(getCorrPreg stack1)(getCorrRes stack1))))
 
 
 
-;Dom: un TDAstack y un TDApregunta.
-;Rec: un TDAstack actualizado.
+;Dom: un stack y un pregunta.
+;Rec: un stack actualizado.
 ;La función actualiza el stack agregando una nueva pregunta, aumentando su correlativo de preguntas y eliminando al usuario de sesión activa.
-;Usa la función recursiva de cola "agregarElemento" para agregar la respuestas al TDApreguntas y de esta forma actualizar el stack, pues es
+;Usa la función recursiva de cola "agregarElemento" para agregar la pregunta a preguntas y de esta forma actualizar el stack, pues es
 ;la forma más rápido de hacerlo.
 (define actualizarStackPreg(lambda(stack1 pregunta)
                              (stack (getUsuarios stack1) emptyUser (agregarElemento (getPreguntas stack1) pregunta) (+ 1 (getCorrPreg stack1)) (getCorrRes stack1))))
 
 
 
+;Dom: un stack, un booleano, una función(será la función getQuestion) y un entero (id de pregunta).
+;Rec: un stack actualizado.
+;Actualizar un stack cuando el voto a una pregunta.
+;la función reescribe el stack modificando sus usuarios al cambiar la reputación del autor de la pregunta con la función 'actualizarUsuariosReputacionVotPreg',
+;elimina al usuario de sesión activa y modifica las preguntas al agregar el voto en la pregunta con la función 'actualizarPreguntasVot'.
+(define actualizarStackVotPreg(lambda(stack1 booleano funcion idPreg)
+                                (stack
+                                 ;se actualiza usuarios...
+                                 ;la función recibe como parametro la lista de usuarios del stack, el nombre del autor de la pregunta y el booleano(true V+/false V-).
+                                 (actualizarUsuariosReputacionVotPreg (getUsuarios stack1) (getAutorPreg ((funcion idPreg)(getPreguntas stack1))) booleano)
+                                 ;se elimina usuario activo.
+                                 emptyUser
+                                 ;se actualizan preguntas...
+                                 ;la función recibe como parametro la lista de preguntas del stack, el id de la pregunta y el booleano(true V+/false V-).
+                                 (actualizarPreguntasVot (getPreguntas stack1) idPreg booleano)
+                                 (getCorrPreg stack1)(getCorrRes stack1))
+                                )
+  )
 
-;Ejemplo:
-;(agregarAactivo stack1 "Ana")
 
-;Ejemplo:
-(define stack1(stack usuarios1 emptyUser preguntas1 2 2))
-;(define l2(list "------------------------------"))
-;  l2
-;usuarios1
-;(usuarios? usuarios1)
-;preguntas1
-;(preguntas? preguntas1)
-stack1
+;Dom: un stack, un booleano, una función(será la función getAnswer evaluada con el id de respuesta) y un entero (id de pregunta).
+;Rec: un stack actualizado.
+;Actualiza el stack cuando el voto esta destinado a una respuesta.
+;la función reescribe el stack modificando sus usuarios al cambiar la reputación del autor de la pregunta y la del votador con la función 'actualizarUsuariosReputacionVotRes',
+;elimina al usuario de sesión activa y modifica las preguntas al agregar el voto en una respuesta de las respuestas de una de sus pregunta's con la función 'actualizarPreguntasVot'.
+(define actualizarStackVotRes(lambda(stack1 booleano funcion idPreg)
+                               (stack
+                                ;se actualiza usuarios...
+                                ;la función recibe como parametro la lista de usuarios del stack, el nombre del autor de la pregunta, el nombre del votador (usuario activo)
+                                ;y el booleano(true V+/false V-).
+                                (actualizarUsuariosReputacionVotRes (getUsuarios stack1) (getAutorRes ((funcion idPreg)(getPreguntas stack1)))
+                                                                    (getNomUser (getActivo stack1)) booleano)
+                                ;se elimina usuario activo.
+                                emptyUser
+                                ;se actualizan preguntas...
+                                 ;la función recibe como parametro la lista de preguntas del stack, el id de la pregunta, la respuesta y el booleano(true V+/false V-).
+                                (actualizarPreguntasVotRes (getPreguntas stack1) idPreg ((funcion idPreg)(getPreguntas stack1)) booleano)
+                                (getCorrPreg stack1)(getCorrRes stack1))
+                               )
+  )
 
-;Ejemplo:
-;(getCorrPreg stack1)
 
-;Ejemplo:
-;(getUsuarios stack1)
+;Dom: un stack.
+;Rec: un string.
+;La función muestra el stack como un string, usando string-append junto con las funciones 'mostrarUsuarios', 'mostrarPreguntas' para transformar sus elementos en
+;strings y luego unirlos.
+(define mostrarStack(lambda(stack1)
+                      (string-append "Stack overflow:\n"
+                            "PERFILES DE USUARIOS:\n"
+                            (mostrarUsuarios (getUsuarios stack1))
+                            "\nPREGUNTAS:\n"
+                            (mostrarPreguntas (getPreguntas stack1)))))
+
+
+
+;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+
+(define stackPrueba(stack usuarios1 emptyUser preguntas1 3 3))
+(provide stackPrueba)

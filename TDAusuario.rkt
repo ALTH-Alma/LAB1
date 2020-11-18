@@ -1,5 +1,6 @@
 #lang racket
 
+(require "FuncionesGenerales.rkt")
 (provide usuario)
 (provide usuario?)
 (provide emptyUser)
@@ -7,6 +8,7 @@
 (provide getContraseña)
 (provide puedeOfrecerRecompensa?)
 (provide modificarReputacion)
+(provide mostrarUsuario)
 
 ;TDA usuario.
 ;Representación: lista(string nombre, string contraseña, int reputación, lista de referencias)
@@ -47,7 +49,7 @@
 ;Capa pertenencia.
 ;Dom: una lista.
 ;Rec: un booleano.
-;Esta función entrega un true si la lista evaluada corresponde a un TDA usuario.
+;Esta función entrega un true si la lista evaluada corresponde a un usuario.
 (define usuario?(lambda(lista)
                   (if (null? lista)
                       true
@@ -87,11 +89,36 @@
                              )
   )
 
-;Ejemplo:
+;Dom: un usuario.
+;Rec: un string.
+;La función muestra de forma ordenada todos los elementos del usuario en un string.
+;Usa la función recursiva mostrarElementosList para mostrar sus referencias y number->string para tranformar el valor de sus reputación en un string.
+(define mostrarUsuario(lambda(user)
+                        (string-append "Nombre usuario: "(getNomUser user)". "
+                                       "\nContraseña: "(getContraseña user)". "
+                                       "\nReputación: "(number->string (getReputacion user))" puntos."
+                                       "\nReferencias: "(mostrarElementosList (getReferencias user))"\n"
+                                       )
+                        )
+  )
+
+;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+
 (provide u1)
 (provide u2)
+(provide u3)
+(provide u4)
+
 (define refe(list "python" "c++"))
-(define u1(usuario "Maria" "Maria1999" 20 refe))
-(define u2(usuario "Ana" "A1234" 30 refe))
-u1
-u2
+(define refe1(list "java" "python"))
+(define refe2(list "Racket" "c#"))
+
+(define u1(usuario "Maria" "Maria1999" 50 refe2))
+(define u2(usuario "Ana" "A1234" 70 refe1))
+(define u3(usuario "Juan" "juan2000" 20 refe))
+(define u4(usuario "Pedro" "P340" 90 refe))
+
+;u1
+;u2
+;u3
+;u4

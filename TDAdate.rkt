@@ -1,6 +1,7 @@
 #lang racket
 (provide date)
 (provide date?)
+(provide date->string)
 
 ;TDA date.
 ;Se utiliza para establecer fechas de publicación de preguntas y respuestas. 
@@ -40,4 +41,11 @@
                (if(and(list? fecha)(integer? (getDia fecha))(<= (getDia fecha) 31)(integer? (getMes fecha))(<= (getMes fecha) 12)(integer? (getAño fecha)))
                   true
                   false)))
+
+;Dom: un date.
+;Rec: un string.
+;La función transforma un date en string.
+(define date->string(lambda(date)
+                      (string-append (number->string (getDia date)) "/" (number->string (getMes date)) "/" (number->string (getAño date)) ". ")))
+
 

@@ -7,6 +7,7 @@
 (provide siguientesElementos)
 (provide agregarElemento)
 (provide mostrarElementosList)
+(provide mostrarElementos)
 (provide emptyList)
 (provide l)
 
@@ -94,14 +95,39 @@
                     )
   )
 
-;Dom: una lista.
-;Rec: uns lista ordenada con comas y punto.
-;La función muestra una lista con comas para separar cada elemento de la lista.
+;Dom: una lista de strings.
+;Rec: un string de la lista ordenada con comas y punto.
+;Si la lista entregada estaba vacia retorna un string "No tiene."
+;La función genera un string con comas para separar cada elemento de la lista.
 ;Usa recursión natural, ya que esta permite rehacer la lista agragando los caracteres
-;y dejando todos los cons como estados pendientes.
+;y dejando todos los string-append como estados pendientes.
 (define mostrarElementosList(lambda(lista)
                               (if (null? lista)
-                                  emptyList
+                                  "No tiene."
                                   (if (null? (siguientesElementos lista))
-                                      (cons (primerElemento lista)(cons "." null))
-                                      (cons (primerElemento lista)(cons "," (mostrarElementosList (siguientesElementos lista))))))))
+                                      (string-append (primerElemento lista) ".")
+                                      (string-append (primerElemento lista)(string-append ", " (mostrarElementosList (siguientesElementos lista))))
+                                      )
+                                  )
+                              )
+  )
+
+;Dom: una lista de elementos y una función mostrar (esta función toma un elemento de la lista, lo ordena y lo entrega como string,
+;varia según la lista que se ingrese).
+;Rec: un string. Si la lista que se ingresa estaba vacía, se entrega un string que lo señala: "Por el momento no tiene".
+;La función genera un string de la lista de elementos que se le entrega de forma.
+;Usa recursión natural para ir uniendo los elementos transformados a string por la función mostrar, dejando pendiente los string-append
+;de las llamadas recursivas. Se usa esta recursión por que es la forma más facíl de reescribir la lista.
+;Es como la fución map.
+(define mostrarElementos(lambda(listaElementos funcionMostrar)
+                          (if (null? listaElementos)
+                              "Por el momento no tiene.\n"
+                              (string-append "\n"
+                                             (if (null? (siguientesElementos listaElementos))
+                                                 (string-append (funcionMostrar (primerElemento listaElementos))" \n")
+                                                 (string-append (funcionMostrar (primerElemento listaElementos)) " \n" (mostrarElementos (siguientesElementos listaElementos) funcionMostrar)))
+                                             )
+                              )
+                          )
+  )
+

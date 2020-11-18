@@ -10,12 +10,13 @@
 (provide actualizarUsuarios2Reput)
 (provide actualizarUsuariosReputacionVotPreg)
 (provide actualizarUsuariosReputacionVotRes)
+(provide mostrarUsuarios)
 
 ;TDA usuarios.
-;Representación: una lista de TDAs usuario (usuario1, usuario2,....,..,., usuarioN).
+;Representación: una lista de usuario's (usuario1, usuario2,....,..,., usuarioN).
 
 ;Capa constructor.
-;Dom: TDAs usuario.
+;Dom: usuario's.
 ;Rec: usuarios.
 (define emptyUsers null)
 (define (usuarios . usuario) usuario)
@@ -29,10 +30,10 @@
 ;Capa pertenencia.
 ;Dom: una lista.
 ;Rec: un booleano.
-;Entrega un true si las lista entregada corresponde a un TDA usuarios y sino un false.
+;Entrega un true si las lista entregada corresponde a usuarios y sino un false.
 ;Esta función utiliza la función recursiva "es?" ubicada "funcionesGenerales" para ir
 ;verificando si cada elemento de la lista corresponde a un usuario y de esta forma saber
-;si es un TDA usuarios.
+;si son usuarios.
 (define usuarios? (lambda(lista)
                     (if (null? lista)
                         true
@@ -147,24 +148,16 @@
                                                 (actualizarUsuarios2Reput listaUsuarios votador autorRes (cons - 1) (cons - 2))))) ;voto negativo.
 
 
-
-;Ejemplo:
-;(actualizarUsuariosAccept usuarios1 "Ana" "Maria" 10)
-
-;Ejemplo:
-;(actualizarUsuariosReputacion usuarios1 "Ana" (cons - 5))
-
-
-;Ejemplo:
-;(getUsuario "Ana" usuarios1)
-;Ejemplo:
-;(autentificar "Ana" "A1234" (getUsuarios stack1))
-;(autentificar "Ana" "A123" (getUsuarios stack1)) 
-;(autentificar "Ana" "" (getUsuarios stack1))
-;(autentificar "Maria" "A1234" (getUsuarios stack1))
+;Dom: usuarios.
+;Rec: un string.
+;La función utiliza la función 'mostrarElementos' en conjunto con la función 'mostrarUsuario' para ir transformando todos los usuario's
+;en usuarios en string y los une en un gran string ordenado.
+(define mostrarUsuarios(lambda(listaUsuarios)
+                         (mostrarElementos listaUsuarios mostrarUsuario)))
 
 
 
-;Ejemplo:
+;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
+
 (provide usuarios1)
-(define usuarios1 (usuarios u1 u2))
+(define usuarios1 (usuarios u1 u2 u3 u4))

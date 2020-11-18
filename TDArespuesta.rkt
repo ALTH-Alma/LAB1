@@ -11,10 +11,7 @@
 (provide respuesta?)
 (provide modificarResAccept)
 (provide modificarResVot)
-(provide a1)
-(provide a2)
-(provide a3)
-(provide a4)
+(provide mostrarRespuesta)
 
 
 ;TDA respuesta.
@@ -114,29 +111,36 @@
                              (respuesta (getIdRes res) (getAutorRes res) (getFechaRes res) (getContenidoRes res) (getEtiquetasRes res) (getAceptacionRes res)
                                         (getVfavorRes res) (+ 1 (getVcontraRes res)) (getReportesRes res)))))
 
-;Dom: un TDA respuesta
-;Rec: una lista.
-;Función que ordena todos los elementos de una respuesta utilizando una lista y strings. Muestra una respuesta estructurada.
+;Dom: una respuesta.
+;Rec: un string.
+;Función que ordena todos los elementos de una respuesta utilizando la función string-append, strings y las funciónes date->string, number->string y mostrarElementosList
+;para transformar sus elementos en strings. Muestra una respuesta estructurada.
 ;Posteriormente se utiliza para mostrar un stack o parte de un stack en un gran string que puede verse ordenado con la función display.
 (define mostrarRespuesta(lambda(res)
-                          (list "ID:"(getIdRes res)
-                                "\nRespuesta:"(getContenidoRes res)
-                                "\nAutor:"(getAutorRes res)
-                                "\nFecha publicación:"(getFechaRes res)
-                                "\nEtiquetas:"(mostrarElementosList (getEtiquetasRes res))
-                                "\nEstado:"(getAceptacionRes res)
-                                "\nVotos a favor:"(getVfavorRes res)
-                                "\nVotos en contra:"(getVcontraRes res)
-                                "\nReportes:"(getReportesRes res)"\n")))
+                          (string-append "ID: "(number->string (getIdRes res))
+                                "\nRespuesta: "(getContenidoRes res)". "
+                                "\nAutor: "(getAutorRes res)". "
+                                "\nFecha publicación: "(date->string(getFechaRes res))
+                                "\nEtiquetas: "(mostrarElementosList (getEtiquetasRes res))
+                                "\nEstado: "(getAceptacionRes res)". "
+                                "\nVotos a favor: "(number->string (getVfavorRes res))
+                                "\nVotos en contra: "(number->string (getVcontraRes res))
+                                "\nReportes: "(number->string (getReportesRes res))"\n")
+                          )
+  )
 
 
 
-;Ejemplo:
-(define a1(respuesta 0 "Ana" (date 2 3 2020) "Los 12 meses" emptyList "Aceptada" 10 2 0))
-(define a2(respuesta 1 "Juan" (date 1 2 2020) "Solo 1 mes, febrero" emptyList "Rechazada" 2 9 3))
-(define a3(respuesta 2 "Pedro" (date 1 2 2020) "Nose" emptyList "Rechazada" 4 5 6))
-(define a4(respuesta 3 "Ana" (date 2 3 2020) "365 días" emptyList "Aceptada" 12 2 0))
+;EJEMPLOS NECESARIOS PARA EJMPLOS DE FUNCIONES MAIN:
 
-;Ejemplo:
-;(mostrarRespuesta a1)
-;(display (mostrarRespuesta a1))
+(define a1(respuesta 0 "Pedro" (date 2 3 2020) "Aumenta la complejidad y puede generar resultados impredecibles" (list "Variables globales") "" 10 2 0))
+(define a2(respuesta 1 "Juan" (date 1 3 2020) "El problema de las variables globales es que crea dependencias ocultas. Cuando se trata
+ de aplicaciones grandes, ni tú mismo sabes/recuerdas/tienes claro los objetos que tienes y sus relaciones." (list "Malas practicas") "" 2 9 1))
+(define a3(respuesta 2 "Maria" (date 13 11 2020) "Usando Qt Style Sheet" emptyList "" 6 3 0))
+;(define a4(respuesta 3 "Ana" (date 2 3 2020) "365 días" emptyList "Aceptada" 12 2 0))
+(provide a1)
+(provide a2)
+(provide a3)
+;a1
+;a2
+;a3
