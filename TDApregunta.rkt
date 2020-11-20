@@ -20,7 +20,7 @@
 (provide mostrarPregunta)
 
 ;TDA Pregunta.
-;Representación: lista(int id pregunta, string nombre del autor, un date fecha de publicación, contenidoPreg contenido, lista de etiquetas,
+;Representación: lista(int id pregunta, string nombre del autor, date fecha de publicación, contenidoPreg contenido, lista de etiquetas,
 ;string estado pregunta(Abierta/Cerrada), int número de visualizaciones, int votos a favor, int votos en contra, una recompensa recompensa,
 ;int reportes, respuestas respuestas).
 
